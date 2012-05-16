@@ -1,17 +1,14 @@
 <?php
+// --------------------------------------------------------------
+// Load helpers
+// --------------------------------------------------------------
+require __DIR__.DS.'helpers'.EXT;
 
 // --------------------------------------------------------------
 // Load bundles
 // --------------------------------------------------------------
-$bundles = require __DIR__ . DS . 'bundles'.EXT;
-foreach ($bundles as $bundle => $config)
-{
-	Bundle::register($bundle, $config);
-	if($config['auto'])
-	{
-		Bundle::start($bundle);
-	}
-}
+Bundle::start('layla_thirdparty_dbmanager');
+Bundle::start('layla_thirdparty_bootsparks');
 
 // --------------------------------------------------------------
 // Load directories
