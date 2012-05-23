@@ -165,6 +165,167 @@ class Layla_Domain_Add_Tables {
 			'type' => 'webpage',
 			'content' => '<html><head></head><body>this is the layout</body></html>',
 		));
+
+		$permissiongroups = array(
+			'account' => array(
+				'lang' => array(
+					1 => 'Account'
+				),
+				'permissions' => array(
+					'create' => array(
+						'lang' => array(
+							1 => 'Create'
+						)
+					),
+					'read' => array(
+						'lang' => array(
+							1 => 'Read'
+						)
+					),
+					'update' => array(
+						'lang' => array(
+							1 => 'Update'
+						)
+					),
+					'delete' => array(
+						'lang' => array(
+							1 => 'Delete'
+						)
+					),
+					'set_permissions' => array(
+						'lang' => array(
+							1 => 'Set permissions'
+						)
+					)
+				)
+			),
+			'page' => array(
+				'lang' => array(
+					1 => 'Page'
+				),
+				'permissions' => array(
+					'create' => array(
+						'lang' => array(
+							1 => 'Create'
+						)
+					),
+					'read' => array(
+						'lang' => array(
+							1 => 'Read'
+						)
+					),
+					'update' => array(
+						'lang' => array(
+							1 => 'Update'
+						)
+					),
+					'delete' => array(
+						'lang' => array(
+							1 => 'Delete'
+						)
+					),
+					'publish' => array(
+						'lang' => array(
+							1 => 'Publish'
+						)
+					)
+				)
+			),
+			'media' => array(
+				'lang' => array(
+					1 => 'Media'
+				),
+				'permissions' => array(
+					'create' => array(
+						'lang' => array(
+							1 => 'Create'
+						)
+					),
+					'read' => array(
+						'lang' => array(
+							1 => 'Read'
+						)
+					),
+					'update' => array(
+						'lang' => array(
+							1 => 'Update'
+						)
+					),
+					'delete' => array(
+						'lang' => array(
+							1 => 'Delete'
+						)
+					),
+				)
+			)
+		);
+
+		Schema::create('permissiongroups', function($table)
+		{
+			$table->increments('id');
+			$table->string('resource');
+		});
+
+		Schema::create('permissiongroup_lang', function($table)
+		{
+			$table->increments('id');
+			$table->integer('permissiongroup_id');
+			$table->integer('language_id');
+			$table->string('name');
+		});
+
+		Schema::create('permissions', function($table)
+		{
+			$table->increments('id');
+			$table->integer('permissiongroup_id');
+			$table->string('action');
+		});
+
+		Schema::create('permission_lang', function($table)
+		{
+			$table->increments('id');
+			$table->integer('language_id');
+			$table->string('name');
+		});
+
+		Schema::create('user_permission', function($table)
+		{
+			$table->increments('id');
+			$table->integer('user_id');
+			$table->integer('permission_id');
+		});
+
+		foreach ($permissiongroups as $resource => $options)
+		{
+			$permissiongroup_id = DB::table('permissiongroups')->insert_get_id(array(
+				'resource' => $resource
+			));
+
+			foreach ($options['lang'] as $language_id => $name)
+			{
+				DB::table('permissiongroup_lang')->insert(array(
+					'permissiongroup_id' => $permissiongroup_id,
+					'language_id' => $language_id,
+					'name' => $name
+				));
+			}
+
+			foreach ($options['permissions'] as $action => $options)
+			{
+				DB::table('permissions')->insert(array(
+					'permissiongroup_id' => $permissiongroup_id,
+					'action' => $action
+				));
+
+				foreach ($options['lang'] as $language_id => $name)
+				{
+					DB::table('permission_lang')->insert(array(
+						'language_id' => $language_id,
+						'name' => $name
+					));
+				}
+			}
+		}
 	}
 
 	/**
