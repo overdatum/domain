@@ -127,22 +127,45 @@ class Layla_Domain_Add_Tables {
 			$table->integer('layout_id');
 		});
 
+		Schema::create('mediagroups', function($table)
+		{
+			$table->increments('id');
+			$table->string('name');
+		});
+
+		DB::table('mediagroups')->insert(array(
+			'name' => 'Layla'
+		));
+
 		Schema::create('media', function($table)
 		{
 			$table->increments('id');
-			$table->integer('category_id');
-			$table->integer('type_id');
-			$table->string('path');
+			$table->integer('mediagroup_id');
+			$table->integer('mediatype_id');
+			$table->string('location', 300);
+			$table->timestamps();
+		});
+
+		DB::table('media')->insert(array(
+			'mediagroup_id' => 1,
+			'mediatype_id'  => 1,
+			'location'      => path('public').'img'.DS.'layla.gif',
+			'created_at'    => new \DateTime,
+			'updated_at'    => new \DateTime
+		));
+
+		Schema::create('media_lang', function($table)
+		{
+			$table->increments('id');
+			$table->integer('language_id');
 			$table->string('title');
 			$table->text('description');
 			$table->string('tags');
 			$table->timestamps();
 		});
 
-		DB::table('media')->insert(array(
-			'category_id' => 1,
-			'type_id'     => 1,
-			'path'        => path('public').'img'.DS.'layla.gif',
+		DB::table('media_lang')->insert(array(
+			'language_id' => 1,
 			'title'       => 'Layla!',
 			'description' => 'Layla logo',
 			'tags'        => 'layla,logo',
@@ -150,32 +173,16 @@ class Layla_Domain_Add_Tables {
 			'updated_at'  => new \DateTime
 		));
 
-		Schema::create('media_cat', function($table)
+		Schema::create('mediatypes', function($table)
 		{
 			$table->increments('id');
 			$table->string('name');
 		});
 
-		DB::table('media_cat')->insert(array(
-			'name' => 'Layla stuff'
-		));
-
-		Schema::create('media_types', function($table)
-		{
-			$table->increments('id');
-			$table->string('name');
-		});
-
-		DB::table('media_types')->insert(array(
-			'name' => 'image'
-		));
-		
-		DB::table('media_types')->insert(array(
-		  	'name' => 'youtube'
-		));
-
-		DB::table('media_types')->insert(array(
-		  	'name' => 'vimeo'
+		DB::table('mediatypes')->insert(array(
+			array('name' => 'image'),
+			array('name' => 'youtube'),
+			array('name' => 'vimeo')
 		));
 
 		Schema::create('module_region', function($table)
@@ -387,19 +394,25 @@ class Layla_Domain_Add_Tables {
 	public function down()
 	{
 		Schema::drop('accounts');
-		Schema::drop('roles');
-		Schema::drop('role_lang');
 		Schema::drop('account_role');
-		Schema::drop('pages');
-		Schema::drop('page_lang');
-		Schema::drop('regions');
-		Schema::drop('media');
-		Schema::drop('media_cat');
-		Schema::drop('media_types');
-		Schema::drop('module_region');
-		Schema::drop('modules');
 		Schema::drop('languages');
 		Schema::drop('layouts');
+		Schema::drop('media');
+		Schema::drop('mediagroups');
+		Schema::drop('mediatypes');
+		Schema::drop('media_lang');
+		Schema::drop('modules');
+		Schema::drop('module_region');
+		Schema::drop('pages');
+		Schema::drop('page_lang');
+		Schema::drop('permissiongroups');
+		Schema::drop('permissiongroup_lang');
+		Schema::drop('permissions');
+		Schema::drop('permission_lang');
+		Schema::drop('user_permission');
+		Schema::drop('regions');
+		Schema::drop('roles');
+		Schema::drop('role_lang');
 	}
 
 }
