@@ -4,6 +4,8 @@ class Account extends Eloquent {
 	
 	public static $timestamps = true;
 
+	public static $sequence = 'accounts_id_seq';
+
 	public static $table = 'accounts';
 
 	public static $accessible = array('name', 'email', 'language_id', 'id');
@@ -13,6 +15,7 @@ class Account extends Eloquent {
 	public static $rules = array(
 		'email' => 'required|email',
 		'name' => 'required',
+		'language_id' => 'required'
 	);
 
 	public static $hidden = array('password', 'language_id');
