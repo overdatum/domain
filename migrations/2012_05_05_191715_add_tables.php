@@ -127,6 +127,64 @@ class Layla_Domain_Add_Tables {
 			$table->integer('layout_id');
 		});
 
+		Schema::create('mediagroups', function($table)
+		{
+			$table->increments('id');
+			$table->string('name');
+		});
+
+		DB::table('mediagroups')->insert(array(
+			'name' => 'Layla'
+		));
+
+		Schema::create('media', function($table)
+		{
+			$table->increments('id');
+			$table->integer('mediagroup_id');
+			$table->integer('mediatype_id');
+			$table->string('location', 300);
+			$table->timestamps();
+		});
+
+		DB::table('media')->insert(array(
+			'mediagroup_id' => 1,
+			'mediatype_id'  => 1,
+			'location'      => path('public').'img'.DS.'layla.gif',
+			'created_at'    => new \DateTime,
+			'updated_at'    => new \DateTime
+		));
+
+		Schema::create('media_lang', function($table)
+		{
+			$table->increments('id');
+			$table->integer('language_id');
+			$table->string('title');
+			$table->text('description');
+			$table->string('tags');
+			$table->timestamps();
+		});
+
+		DB::table('media_lang')->insert(array(
+			'language_id' => 1,
+			'title'       => 'Layla!',
+			'description' => 'Layla logo',
+			'tags'        => 'layla,logo',
+			'created_at'  => new \DateTime,
+			'updated_at'  => new \DateTime
+		));
+
+		Schema::create('mediatypes', function($table)
+		{
+			$table->increments('id');
+			$table->string('name');
+		});
+
+		DB::table('mediatypes')->insert(array(
+			array('name' => 'image'),
+			array('name' => 'youtube'),
+			array('name' => 'vimeo')
+		));
+
 		Schema::create('module_region', function($table)
 		{
 			$table->increments('id');
@@ -336,16 +394,25 @@ class Layla_Domain_Add_Tables {
 	public function down()
 	{
 		Schema::drop('accounts');
-		Schema::drop('roles');
-		Schema::drop('role_lang');
 		Schema::drop('account_role');
-		Schema::drop('pages');
-		Schema::drop('page_lang');
-		Schema::drop('regions');
-		Schema::drop('module_region');
-		Schema::drop('modules');
 		Schema::drop('languages');
 		Schema::drop('layouts');
+		Schema::drop('media');
+		Schema::drop('mediagroups');
+		Schema::drop('mediatypes');
+		Schema::drop('media_lang');
+		Schema::drop('modules');
+		Schema::drop('module_region');
+		Schema::drop('pages');
+		Schema::drop('page_lang');
+		Schema::drop('permissiongroups');
+		Schema::drop('permissiongroup_lang');
+		Schema::drop('permissions');
+		Schema::drop('permission_lang');
+		Schema::drop('user_permission');
+		Schema::drop('regions');
+		Schema::drop('roles');
+		Schema::drop('role_lang');
 	}
 
 }
