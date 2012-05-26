@@ -62,10 +62,12 @@ Autoloader::map(array(
 
 Route::filter('api_auth', function()
 {
-	if( ! Input::get('PHP_AUTH_USER') || ! Input::get('PHP_AUTH_PW'))
+	if( ! $_SERVER['PHP_AUTH_USER'] || ! $_SERVER['PHP_AUTH_PW'])
 	{
-		return Response::make('{}', 401, array('content-type' => 'text/plain'));
+		return Response::json(array(), 401);
 	}
+
+	//Auth::attempt();
 });
 
 // --------------------------------------------------------------
