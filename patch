@@ -1,0 +1,17 @@
+#!/bin/bash
+
+git checkout master 2> /dev/null
+echo "git checkout master" 
+git pull upstream master 2> /dev/null
+echo "git pull upstream master"
+latest_patch=$(git branch 2> /dev/null | awk '/patch-/{x=$0}END{split(x,a,/-/);print(substr(a[2],1,1))}')
+
+if [[ $latest_patch = *[![:digit:]]* ]]
+then
+	new_patch="patch-$(expr $latest_patch + 1)"
+else
+	new_patch="patch-1"
+fi
+git checkout master -b $new_patch
+echo "git checkout master -b $new_patch"
+echo "Done! Now build some cool stuff! =)"
