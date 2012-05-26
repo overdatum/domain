@@ -62,9 +62,9 @@ Autoloader::map(array(
 
 Route::filter('api_auth', function()
 {
-	if( ! $_SERVER['PHP_AUTH_USER'] || ! $_SERVER['PHP_AUTH_PW'])
+	if( ! isset($_SERVER['PHP_AUTH_USER']) || ! isset($_SERVER['PHP_AUTH_PW']))
 	{
-		return Response::json(array(), 401);
+		//return Response::json(array(), 401);
 	}
 
 	//Auth::attempt();
