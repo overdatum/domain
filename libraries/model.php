@@ -1,4 +1,4 @@
-<?php namespace Layla\Domain;
+<?php namespace Domain;
 
 use Laravel\Database\Eloquent\Model as Laravel_Model;
 use Laravel\Validator;

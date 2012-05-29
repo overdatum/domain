@@ -1,6 +1,6 @@
 <?php
 
-class Layla_Domain_Add_Tables {
+class Domain_Add_Tables {
 
 	/**
 	 * Make changes to the database.

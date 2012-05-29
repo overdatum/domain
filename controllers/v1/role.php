@@ -1,6 +1,6 @@
 <?php
 
-class Layla_Domain_V1_Role_Controller extends Layla_Domain_Base_Controller {
+class Domain_V1_Role_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{

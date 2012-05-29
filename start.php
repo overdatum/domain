@@ -1,4 +1,7 @@
 <?php
+
+use Layla\DBManager;
+
 // --------------------------------------------------------------
 // Load helpers
 // --------------------------------------------------------------
@@ -7,8 +10,8 @@ require __DIR__.DS.'helpers'.EXT;
 // --------------------------------------------------------------
 // Load bundles
 // --------------------------------------------------------------
-Bundle::start('layla_thirdparty_dbmanager');
-Bundle::start('layla_thirdparty_bootsparks');
+//Bundle::start('thirdparty_dbmanager');
+Bundle::start('thirdparty_bootsparks');
 
 // --------------------------------------------------------------
 // Load directories
@@ -21,7 +24,7 @@ Autoloader::directories(array(
 // Load namespaces
 // --------------------------------------------------------------
 Autoloader::namespaces(array(
-	'Layla\\Domain' => __DIR__.DS.'libraries',
+	'Domain' => __DIR__.DS.'libraries',
 ));
 
 // --------------------------------------------------------------
@@ -44,12 +47,12 @@ Route::filter('auth', function()
 // --------------------------------------------------------------
 // Setting system tables
 // --------------------------------------------------------------
-DBManager::$hidden = Config::get('layla_domain::dbmanager.hidden');
+DBManager::$hidden = Config::get('domain::dbmanager.hidden');
 
 // --------------------------------------------------------------
 // Set Aliases
 // --------------------------------------------------------------
-Autoloader::alias('Layla\\Domain\\Model', 'Eloquent');
+Autoloader::alias('Domain\\Model', 'Eloquent');
 
 $api_version = Config::get('layla.domain.api.version');
 
@@ -57,7 +60,7 @@ $api_version = Config::get('layla.domain.api.version');
 // Map the Base Controller
 // --------------------------------------------------------------
 Autoloader::map(array(
-	'Layla_Domain_Base_Controller' => __DIR__.DS.'controllers'.DS.'v'.$api_version.DS.'base'.EXT,
+	'Domain_Base_Controller' => __DIR__.DS.'controllers'.DS.'v'.$api_version.DS.'base'.EXT,
 ));
 
 Route::filter('api_auth', function()
@@ -75,33 +78,33 @@ Route::filter('api_auth', function()
 // --------------------------------------------------------------
 Route::group(array('before' => 'api_auth'), function() use ($api_version)
 {
-	Route::get('v'.$api_version.'/account/all', 'layla_domain::v'.$api_version.'.account@account_all');
-	Route::get('v'.$api_version.'/account/(:num)', 'layla_domain::v'.$api_version.'.account@account');
-	Route::post('v'.$api_version.'/account', 'layla_domain::v'.$api_version.'.account@account');
-	Route::put('v'.$api_version.'/account/(:num)', 'layla_domain::v'.$api_version.'.account@account');
-	Route::delete('v'.$api_version.'/account/(:num)', 'layla_domain::v'.$api_version.'.account@account');
+	Route::get('v'.$api_version.'/account/all', 'domain::v'.$api_version.'.account@account_all');
+	Route::get('v'.$api_version.'/account/(:num)', 'domain::v'.$api_version.'.account@account');
+	Route::post('v'.$api_version.'/account', 'domain::v'.$api_version.'.account@account');
+	Route::put('v'.$api_version.'/account/(:num)', 'domain::v'.$api_version.'.account@account');
+	Route::delete('v'.$api_version.'/account/(:num)', 'domain::v'.$api_version.'.account@account');
 
-	Route::get('v'.$api_version.'/page/all', 'layla_domain::v'.$api_version.'.page@page_all');
-	Route::get('v'.$api_version.'/page/(:num)', 'layla_domain::v'.$api_version.'.page@page');
-	Route::post('v'.$api_version.'/page', 'layla_domain::v'.$api_version.'.page@page');
-	Route::put('v'.$api_version.'/page/(:num)', 'layla_domain::v'.$api_version.'.page@page');
-	Route::delete('v'.$api_version.'/page/(:num)', 'layla_domain::v'.$api_version.'.page@page');
+	Route::get('v'.$api_version.'/page/all', 'domain::v'.$api_version.'.page@page_all');
+	Route::get('v'.$api_version.'/page/(:num)', 'domain::v'.$api_version.'.page@page');
+	Route::post('v'.$api_version.'/page', 'domain::v'.$api_version.'.page@page');
+	Route::put('v'.$api_version.'/page/(:num)', 'domain::v'.$api_version.'.page@page');
+	Route::delete('v'.$api_version.'/page/(:num)', 'domain::v'.$api_version.'.page@page');
 
-	Route::get('v'.$api_version.'/language/all', 'layla_domain::v'.$api_version.'.language@language_all');
-	Route::get('v'.$api_version.'/language/(:num)', 'layla_domain::v'.$api_version.'.language@language');
-	Route::post('v'.$api_version.'/language', 'layla_domain::v'.$api_version.'.language@language');
-	Route::put('v'.$api_version.'/language/(:num)', 'layla_domain::v'.$api_version.'.language@language');
-	Route::delete('v'.$api_version.'/language/(:num)', 'layla_domain::v'.$api_version.'.language@language');
+	Route::get('v'.$api_version.'/language/all', 'domain::v'.$api_version.'.language@language_all');
+	Route::get('v'.$api_version.'/language/(:num)', 'domain::v'.$api_version.'.language@language');
+	Route::post('v'.$api_version.'/language', 'domain::v'.$api_version.'.language@language');
+	Route::put('v'.$api_version.'/language/(:num)', 'domain::v'.$api_version.'.language@language');
+	Route::delete('v'.$api_version.'/language/(:num)', 'domain::v'.$api_version.'.language@language');
 
-	Route::get('v'.$api_version.'/layout/all', 'layla_domain::v'.$api_version.'.layout@layout_all');
-	Route::get('v'.$api_version.'/layout/(:num)', 'layla_domain::v'.$api_version.'.layout@layout');
-	Route::post('v'.$api_version.'/layout', 'layla_domain::v'.$api_version.'.layout@layout');
-	Route::put('v'.$api_version.'/layout/(:num)', 'layla_domain::v'.$api_version.'.layout@layout');
-	Route::delete('v'.$api_version.'/layout/(:num)', 'layla_domain::v'.$api_version.'.layout@layout');
+	Route::get('v'.$api_version.'/layout/all', 'domain::v'.$api_version.'.layout@layout_all');
+	Route::get('v'.$api_version.'/layout/(:num)', 'domain::v'.$api_version.'.layout@layout');
+	Route::post('v'.$api_version.'/layout', 'domain::v'.$api_version.'.layout@layout');
+	Route::put('v'.$api_version.'/layout/(:num)', 'domain::v'.$api_version.'.layout@layout');
+	Route::delete('v'.$api_version.'/layout/(:num)', 'domain::v'.$api_version.'.layout@layout');
 
-	Route::get('v'.$api_version.'/role/all', 'layla_domain::v'.$api_version.'.role@role_all');
-	Route::get('v'.$api_version.'/role/(:num)', 'layla_domain::v'.$api_version.'.role@role');
-	Route::post('v'.$api_version.'/role', 'layla_domain::v'.$api_version.'.role@role');
-	Route::put('v'.$api_version.'/role/(:num)', 'layla_domain::v'.$api_version.'.role@role');
-	Route::delete('v'.$api_version.'/role/(:num)', 'layla_domain::v'.$api_version.'.role@role');
+	Route::get('v'.$api_version.'/role/all', 'domain::v'.$api_version.'.role@role_all');
+	Route::get('v'.$api_version.'/role/(:num)', 'domain::v'.$api_version.'.role@role');
+	Route::post('v'.$api_version.'/role', 'domain::v'.$api_version.'.role@role');
+	Route::put('v'.$api_version.'/role/(:num)', 'domain::v'.$api_version.'.role@role');
+	Route::delete('v'.$api_version.'/role/(:num)', 'domain::v'.$api_version.'.role@role');
 });

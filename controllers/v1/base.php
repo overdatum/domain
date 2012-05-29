@@ -3,7 +3,7 @@
 /**
 * 
 */
-class Layla_Domain_Base_Controller extends Controller
+class Domain_Base_Controller extends Controller
 {
 	/**
 	 * Enable restful routing
