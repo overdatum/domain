@@ -43,7 +43,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 		$account = $this->model();
 
 		$account::$rules['password'] = 'required';
-		$account::$rules['email'] = 'email|unique:accounts,email';
+		$account::$rules['email'] = 'required|email|unique:accounts,email';
 
 		$account::$accessible[] = 'password';
 
