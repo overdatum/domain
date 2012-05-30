@@ -1,4 +1,6 @@
-<?php
+<?php namespace Domain\Models;
+
+use Domain\Libraries\Model as Eloquent;
 
 class Account extends Eloquent {
 	
@@ -22,12 +24,12 @@ class Account extends Eloquent {
 
 	public function language()
 	{
-		return $this->belongs_to('Language', 'language_id');
+		return $this->belongs_to('Domain\\Models\\Language', 'language_id');
 	}
 
 	public function roles()
 	{
-		return $this->has_many_and_belongs_to('Role');
+		return $this->has_many_and_belongs_to('Domain\\Models\\Role');
 	}
 
 	/**

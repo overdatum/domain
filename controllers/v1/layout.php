@@ -1,5 +1,7 @@
 <?php
 
+use Domain\Models\Layout;
+
 class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	
 	public function __construct()

@@ -1,5 +1,7 @@
 <?php
 
+use Domain\Models\Language;
+
 class Domain_V1_Language_Controller extends Domain_Base_Controller {
 	
 	public function __construct()

@@ -14,17 +14,10 @@ require __DIR__.DS.'helpers'.EXT;
 Bundle::start('thirdparty_bootsparks');
 
 // --------------------------------------------------------------
-// Load directories
-// --------------------------------------------------------------
-Autoloader::directories(array(
-	__DIR__.DS.'models',
-));
-
-// --------------------------------------------------------------
 // Load namespaces
 // --------------------------------------------------------------
 Autoloader::namespaces(array(
-	'Domain' => __DIR__.DS.'libraries',
+	'Domain' => __DIR__,
 ));
 
 // --------------------------------------------------------------
@@ -49,10 +42,6 @@ Route::filter('auth', function()
 // --------------------------------------------------------------
 DBManager::$hidden = Config::get('domain::dbmanager.hidden');
 
-// --------------------------------------------------------------
-// Set Aliases
-// --------------------------------------------------------------
-Autoloader::alias('Domain\\Model', 'Eloquent');
 
 $api_version = Config::get('layla.domain.api.version');
 

@@ -1,5 +1,7 @@
 <?php
 
+use Domain\Models\Account;
+
 class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
@@ -46,7 +48,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 		$account::$accessible[] = 'password';
 
 		$sync = array(
-			'roles' => Input::get('role_ids')
+			'roles' => Input::get('roles')
 		);
 
 		return $this->create_single(Input::all(), $sync);
@@ -66,9 +68,9 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 		if(Input::get('password') !== '') $account::$accessible[] = 'password';
 
 		$sync = array(
-			'roles' => Input::get('role_ids')
+			'roles' => Input::get('roles')
 		);
-		
+			
 		return $this->update_single(Input::all(), $sync);
 	}
 

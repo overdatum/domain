@@ -1,4 +1,4 @@
-<?php namespace Domain;
+<?php namespace Domain\Libraries;
 
 use Laravel\Database\Eloquent\Model as Laravel_Model;
 use Laravel\Validator;

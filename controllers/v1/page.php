@@ -1,5 +1,7 @@
 <?php
 
+use Domain\Models\Page;
+
 class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
