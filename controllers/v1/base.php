@@ -124,7 +124,7 @@ class Domain_Base_Controller extends Controller
 		{
 			foreach ($sync as $relationship => $relation_ids)
 			{
-				$model->$relationship()->sync($relation_ids ? array_filter(array_flip($relation_ids), 'strlen') : array());	
+				$model->$relationship()->sync($relation_ids ? array_flip(array_filter(array_flip($relation_ids), 'strlen')) : array());	
 			}
 			
 			// Return the model's id
