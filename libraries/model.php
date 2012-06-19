@@ -78,4 +78,61 @@ class Model extends Laravel_Model {
 		return $result;
 	}
 
+	/**
+	 * Get the model attributes and relationships in array form.
+	 *
+	 * @return array
+	 */
+	public function to_array()
+	{
+		$attributes = array();
+
+		// First we need to gather all of the regular attributes. If the attribute
+		// exists in the array of "hidden" attributes, it will not be added to
+		// the array so we can easily exclude things like passwords, etc.
+		foreach (array_keys($this->attributes) as $attribute)
+		{
+			if ( ! in_array($attribute, static::$hidden))
+			{
+				$attributes[$attribute] = $this->$attribute;
+			}
+		}
+
+		foreach ($this->relationships as $name => $models)
+		{
+			if(is_null($models))
+			{
+				continue;
+			}
+			
+			// Add the relationship to the output no matter if it has any attributes
+			$attributes[$name] = array();
+			
+			// If the relationship is not a "to-many" relationship, we can just
+			// to_array the related model and add it as an attribute to the
+			// array of existing regular attributes we gathered.
+			if ($models instanceof Model)
+			{
+				$attributes[$name] = $models->to_array();
+			}
+
+			// If the relationship is a "to-many" relationship we need to spin
+			// through each of the related models and add each one with the
+			// to_array method, keying them both by name and ID.
+			elseif (is_array($models))
+			{
+				foreach ($models as $id => $model)
+				{
+					$attributes[$name][$id] = $model->to_array();
+				}
+			}
+			elseif (is_null($models))
+			{
+				$attributes[$name] = $models;
+			}
+		}
+
+		return $attributes;
+	}
+
 }
