@@ -32,6 +32,12 @@ class Account extends Eloquent {
 		return $this->has_many_and_belongs_to('Domain\\Models\\Role');
 	}
 
+	public function versions()
+	{
+		return $this->has_many('Domain\\Models\\Account', 'id')
+			->order_by('version', 'DESC');
+	}
+
 	/**
 	 * Check if the account has a relation with the given role
 	 *

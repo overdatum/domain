@@ -2,9 +2,8 @@
 
 use Domain\Libraries\Model as Eloquent;
 
-class MediaCat extends Eloquent
-{
-
-	public static $table = 'media_cat';
+class AssetLang extends Eloquent {
+	
+	public static $table = 'asset_lang';
 
 }

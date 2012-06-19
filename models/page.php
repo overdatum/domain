@@ -11,8 +11,7 @@ class Page extends Eloquent {
 
 	public function lang()
 	{
-		//$language_id = Session::get('layla.language');
-		return $this->has_one('Domain\\Models\\PageLang');//->where_language_id();
+		return $this->has_many('Domain\\Models\\PageLang')->where_language_id(1);
 	}
 
 	public function account()
