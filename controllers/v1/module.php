@@ -1,12 +1,18 @@
 <?php
 
-use Domain\Models\Account;
+use Domain\Models\Module;
 
-class Domain_V1_Account_Controller extends Domain_Base_Controller {
+class Domain_V1_Module_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Account;
+		$this->model = new Module;
+		
+		$this->settings['sortable'] = array(
+			'modules' => array(
+				'name'
+			)
+		);
 	}
 
 	/**
@@ -14,31 +20,8 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_account_all()
+	public function get_module_all()
 	{
-		$this->options = array(
-			'sort_by' => 'created_at',
-		);
-
-		$this->settings = array(
-			'sortable' => array(
-				'accounts' => array(
-					'name',
-					'email',
-					'created_at',
-					'updated_at'
-				)
-			),
-			'searchable' => array(
-				'page_lang' => array(
-					'name',
-					'email'
-				)
-			)
-		);
-
-		$this->includes = array('roles', 'roles.lang', 'language');
-
 		return $this->get_multiple(Input::all());
 	}
 
@@ -47,19 +30,12 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_account($id)
+	public function get_module($id)
 	{
-		$this->includes = array('roles', 'language');
-
 		return $this->get_single($id);
 	}
 
-	/**
-	 * Add account
-	 *
-	 * @return Response
-	 */
-	public function post_account()
+	protected function insert_module()
 	{
 		$account = $this->model();
 
@@ -76,11 +52,31 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	}
 
 	/**
-	 * Edit account
+	 * Create new module
 	 *
 	 * @return Response
 	 */
-	public function put_account($id)
+	public function post_module_create()
+	{
+		new Generators_Model(array('module_blog_domain::bam', 'has_many:assholes'));
+
+		//$this->insert_module();
+	}
+
+	/**
+	 * Install module
+	 */
+	public function post_module_install()
+	{
+
+	}
+
+	/**
+	 * Edit module
+	 *
+	 * @return Response
+	 */
+	public function put_module($id)
 	{
 		// Find the account we are updating
 		$account = $this->model($id);

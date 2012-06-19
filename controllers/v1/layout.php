@@ -7,6 +7,8 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->model = new Layout;
+
+		$this->versioned = true;
 	}
 
 	/**

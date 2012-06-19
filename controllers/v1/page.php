@@ -7,6 +7,29 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->model = new Page;
+
+		$this->multilanguage = true;
+
+		$this->versioned = true;
+
+		$this->settings = array(
+			'relating' => array(
+				'page_lang' => array(
+					'id',
+					'language_id',
+					'active',
+					'url',
+					'meta_title',
+					'meta_keywords',
+					'meta_description',
+					'menu',
+					'content',
+					'created_at',
+					'updated_at',
+					'created_at'
+				)
+			)
+		);
 	}
 
 	/**
@@ -16,16 +39,31 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function get_page_all()
 	{
-		$this->includes = array('account', 'lang');
-
-		$this->join = array(
+		$this->options = array(
+			'sort_by' => 'created_at',
+		);
+		
+		$this->settings['sortable'] = array(
 			'page_lang' => array(
-				'join' => array('pages.id', '=', 'page_lang.page_id'),
-				'columns' => array('url', 'meta_title', 'meta_keywords', 'meta_description', 'menu', 'content')
+				'meta_title',
+				'menu',
+				'content',
+				'created_at',
+				'updated_at'
 			)
 		);
 
-		return $this->get_multiple();
+		$this->settings['searchable'] = array(
+			'page_lang' => array(
+				'meta_title',
+				'menu',
+				'content'
+			)
+		);
+
+		$this->includes = array('account');
+
+		return $this->get_multiple(Input::all());
 	}
 
 	/**
@@ -35,7 +73,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function get_page($id)
 	{
-		$this->includes = array('layout', 'lang');
+		$this->includes = array('layout', 'versions');
 
 		return $this->get_single($id);
 	}

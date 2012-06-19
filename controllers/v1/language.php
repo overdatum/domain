@@ -16,7 +16,13 @@ class Domain_V1_Language_Controller extends Domain_Base_Controller {
 	 */
 	public function get_language_all()
 	{
-		return $this->get_multiple();
+		$this->settings['sortable'] = array(
+			'languages' => array(
+				'name'
+			)
+		);
+
+		return $this->get_multiple(Input::all());
 	}
 
 	/**

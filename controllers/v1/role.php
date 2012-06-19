@@ -7,6 +7,8 @@ class Domain_V1_Role_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->model = new Role;
+
+		$this->multilanguage = true;
 	}
 
 	/**
@@ -16,9 +18,13 @@ class Domain_V1_Role_Controller extends Domain_Base_Controller {
 	 */
 	public function get_role_all()
 	{
-		$this->includes = array('lang');
+		$this->settings['sortable'] = array(
+			'roles' => array(
+				'name'
+			)
+		);
 
-		return $this->get_multiple();
+		return $this->get_multiple(Input::all());
 	}
 
 	/**
@@ -28,8 +34,6 @@ class Domain_V1_Role_Controller extends Domain_Base_Controller {
 	 */
 	public function get_role($id)
 	{
-		$this->includes = array('lang');
-		
 		return $this->get_single($id);
 	}
 
