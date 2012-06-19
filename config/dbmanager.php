@@ -3,7 +3,7 @@
 return array(
 
 	'hidden' => array(
-		'account_role',
+	/*	'account_role',
 		'accounts',
 		'languages',
 		'template',
@@ -14,7 +14,7 @@ return array(
 		'users',
 		'regions',
 		'region_module',
-		'sessions'
+		'sessions'*/
 	)
 
 );
