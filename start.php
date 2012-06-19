@@ -61,12 +61,19 @@ Route::filter('api_auth', function()
 
 	//Auth::attempt();
 });
+Bundle::start('thirdparty_bob');
 
 // --------------------------------------------------------------
 // Load the routes
 // --------------------------------------------------------------
 Route::group(array('before' => 'api_auth'), function() use ($api_version)
 {
+	Route::get('v'.$api_version.'/module/all', 'domain::v'.$api_version.'.module@module_all');
+	Route::get('v'.$api_version.'/module/(:num)', 'domain::v'.$api_version.'.module@module');
+	Route::post('v'.$api_version.'/module', 'domain::v'.$api_version.'.module@module');
+	Route::put('v'.$api_version.'/module/(:num)', 'domain::v'.$api_version.'.module@module');
+	Route::delete('v'.$api_version.'/module/(:num)', 'domain::v'.$api_version.'.module@module');
+
 	Route::get('v'.$api_version.'/account/all', 'domain::v'.$api_version.'.account@account_all');
 	Route::get('v'.$api_version.'/account/(:num)', 'domain::v'.$api_version.'.account@account');
 	Route::post('v'.$api_version.'/account', 'domain::v'.$api_version.'.account@account');
@@ -96,4 +103,13 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 	Route::post('v'.$api_version.'/role', 'domain::v'.$api_version.'.role@role');
 	Route::put('v'.$api_version.'/role/(:num)', 'domain::v'.$api_version.'.role@role');
 	Route::delete('v'.$api_version.'/role/(:num)', 'domain::v'.$api_version.'.role@role');
+
+	Route::get('v'.$api_version.'/mediagroup/all', 'domain::v'.$api_version.'.mediagroup@mediagroup_all');
+
+	Route::get('v'.$api_version.'/asset/all', 'domain::v'.$api_version.'.asset@asset_all');
 });
+
+// --------------------------------------------------------------
+// Set aliases
+// --------------------------------------------------------------
+Autoloader::alias('Domain\\Libraries\\Response', 'Response');
