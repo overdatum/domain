@@ -11,19 +11,33 @@ class Domain_Add_Tables {
 	{
 		Schema::create('accounts', function($table)
 		{
-			$table->increments('id');
-			$table->integer('language_id');
+			$table->integer('id');
+			$table->integer('version');
 			$table->string('email');
 			$table->string('password');
 			$table->string('name');
+			$table->integer('language_id');
 			$table->timestamps();
 		});
 
 		DB::table('accounts')->insert(array(
+			'id' => 1,
 			'language_id' => 1,
+			'version' => 1,
 			'email' => 'admin@admin.com',
 			'password' => Hash::make('admin'),
 			'name' => 'Administrator',
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
+		DB::table('accounts')->insert(array(
+			'id' => 1,
+			'language_id' => 1,
+			'version' => 2,
+			'email' => 'admin@admin.com',
+			'password' => Hash::make('admin'),
+			'name' => 'Administratorke',
 			'created_at' => new \DateTime,
 			'updated_at' => new \DateTime
 		));
@@ -86,10 +100,20 @@ class Domain_Add_Tables {
 			'updated_at' => new \DateTime
 		));
 
+		DB::table('pages')->insert(array(
+			'template_id' => 1,
+			'account_id' => 1,
+			'type' => 'published',
+			'order' => 2,
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
 		Schema::create('page_lang', function($table)
 		{
 			$table->increments('id');
 			$table->integer('page_id');
+			$table->integer('version');
 			$table->integer('language_id');
 			$table->integer('active');
 			$table->string('url');
@@ -105,17 +129,73 @@ class Domain_Add_Tables {
 			'page_id' => 1,
 			'language_id' => 1,
 			'active' => 1,
+			'version' => 1,
 			'url' => 'home',
-			'meta_title' => 'Welkom op onze website | Testpagina',
-			'meta_keywords' => 'home, welcome',
-			'meta_description' => 'Welkom op de homepagina van ...',
-			'menu' => 'Homepagina',
-			'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+			'meta_title' => 'Welcome to the *intentional typo* haha',
+			'meta_keywords' => 'home, welcome, start here, lol',
+			'meta_description' => 'Welcome to Layla\'s test website',
+			'menu' => 'Home',
+			'content' => 'Welcome to the homepage, bro',
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
+		DB::table('page_lang')->insert(array(
+			'page_id' => 1,
+			'language_id' => 2,
+			'active' => 0,
+			'version' => 1,
+			'url' => 'welkom',
+			'meta_title' => 'Welkom op de homepagina',
+			'meta_keywords' => 'welkom, begin hier, tja...',
+			'meta_description' => 'Welkom op Layla\'s test pagina',
+			'menu' => 'Welkom',
+			'content' => 'Welkom op de homepagina, vriend',
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
+		DB::table('page_lang')->insert(array(
+			'page_id' => 1,
+			'language_id' => 1,
+			'active' => 0,
+			'version' => 2,
+			'url' => 'home',
+			'meta_title' => 'Welcome to the homepage',
+			'meta_keywords' => 'home, welcome, start here, lol',
+			'meta_description' => 'Welcome to Layla\'s test website',
+			'menu' => 'Home',
+			'content' => 'Welcome to the homepage, bro',
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
+		DB::table('page_lang')->insert(array(
+			'page_id' => 2,
+			'language_id' => 1,
+			'active' => 1,
+			'version' => 1,
+			'url' => 'about-us',
+			'meta_title' => 'About Layla',
+			'meta_keywords' => 'about us, layla, what we do, blah, bla',
+			'meta_description' => 'We are Layla, blablabla',
+			'menu' => 'About Us',
+			'content' => 'Layla is a...',
+			'created_at' => new \DateTime,
+			'updated_at' => new \DateTime
+		));
+
+		DB::table('page_lang')->insert(array(
+			'page_id' => 2,
+			'language_id' => 2,
+			'active' => 0,
+			'version' => 1,
+			'url' => 'over-ons',
+			'meta_title' => 'Over Layla',
+			'meta_keywords' => 'dit, gaat, over, ons',
+			'meta_description' => 'Layla doet dit en dat, zus en zo',
+			'menu' => 'Over Ons',
+			'content' => 'Wij zijn Layla!',
 			'created_at' => new \DateTime,
 			'updated_at' => new \DateTime
 		));
@@ -130,14 +210,39 @@ class Domain_Add_Tables {
 		Schema::create('mediagroups', function($table)
 		{
 			$table->increments('id');
+			$table->integer('module_id');
 			$table->string('name');
+			$table->timestamps();
 		});
 
 		DB::table('mediagroups')->insert(array(
-			'name' => 'Layla'
+			array(
+				'module_id' => 1,
+				'name' => 'Nederland - Portugal',
+				'created_at' => new \DateTime,
+				'updated_at' => new \DateTime
+			),
+			array(
+				'module_id' => 1,
+				'name' => 'Nederland - Germany',
+				'created_at' => new \DateTime,
+				'updated_at' => new \DateTime
+			),
+			array(
+				'module_id' => 2,
+				'name' => 'Products',
+				'created_at' => new \DateTime,
+				'updated_at' => new \DateTime
+			),
+			array(
+				'module_id' => 2,
+				'name' => 'Categories',
+				'created_at' => new \DateTime,
+				'updated_at' => new \DateTime
+			),
 		));
 
-		Schema::create('media', function($table)
+		Schema::create('assets', function($table)
 		{
 			$table->increments('id');
 			$table->integer('mediagroup_id');
@@ -146,7 +251,7 @@ class Domain_Add_Tables {
 			$table->timestamps();
 		});
 
-		DB::table('media')->insert(array(
+		DB::table('assets')->insert(array(
 			'mediagroup_id' => 1,
 			'mediatype_id'  => 1,
 			'location'      => path('public').'img'.DS.'layla.gif',
@@ -154,19 +259,21 @@ class Domain_Add_Tables {
 			'updated_at'    => new \DateTime
 		));
 
-		Schema::create('media_lang', function($table)
+		Schema::create('asset_lang', function($table)
 		{
 			$table->increments('id');
+			$table->integer('asset_id');
 			$table->integer('language_id');
-			$table->string('title');
+			$table->string('name');
 			$table->text('description');
 			$table->string('tags');
 			$table->timestamps();
 		});
 
-		DB::table('media_lang')->insert(array(
+		DB::table('asset_lang')->insert(array(
+			'asset_id' => 1,
 			'language_id' => 1,
-			'title'       => 'Layla!',
+			'name'       => 'Layla!',
 			'description' => 'Layla logo',
 			'tags'        => 'layla,logo',
 			'created_at'  => new \DateTime,
@@ -197,8 +304,17 @@ class Domain_Add_Tables {
 		Schema::create('modules', function($table)
 		{
 			$table->increments('id');
-			$table->integer('name');
+			$table->string('name');
 		});
+
+		DB::table('modules')->insert(array(
+			array(
+				'name' => 'Layla'
+			),
+			array(
+				'name' => 'Webshop'
+			)
+		));
 
 		Schema::create('languages', function($table)
 		{
@@ -397,10 +513,10 @@ class Domain_Add_Tables {
 		Schema::drop('account_role');
 		Schema::drop('languages');
 		Schema::drop('layouts');
-		Schema::drop('media');
+		Schema::drop('assets');
 		Schema::drop('mediagroups');
 		Schema::drop('mediatypes');
-		Schema::drop('media_lang');
+		Schema::drop('asset_lang');
 		Schema::drop('modules');
 		Schema::drop('module_region');
 		Schema::drop('pages');
