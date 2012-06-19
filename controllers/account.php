@@ -2,7 +2,7 @@
 
 use Domain\Models\Account;
 
-class Domain_V1_Account_Controller extends Domain_Base_Controller {
+class Domain_Account_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
@@ -14,7 +14,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_account_all()
+	public function get_list()
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -47,7 +47,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_account($id)
+	public function get_read($id)
 	{
 		$this->includes = array('roles', 'language');
 
@@ -59,7 +59,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function post_account()
+	public function post_create()
 	{
 		$account = $this->model();
 
@@ -80,7 +80,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function put_account($id)
+	public function put_update($id)
 	{
 		// Find the account we are updating
 		$account = $this->model($id);
@@ -100,7 +100,7 @@ class Domain_V1_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function delete_account($id)
+	public function delete_delete($id)
 	{
 		$this->model($id);
 

@@ -1,23 +1,25 @@
 <?php
 
-use Domain\Models\Language;
+use Domain\Models\Role;
 
-class Domain_V1_Language_Controller extends Domain_Base_Controller {
+class Domain_Role_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Language;
+		$this->model = new Role;
+
+		$this->multilanguage = true;
 	}
 
 	/**
-	 * Get all languages
+	 * Get all roles
 	 *
 	 * @return Response
 	 */
-	public function get_language_all()
+	public function get_list()
 	{
 		$this->settings['sortable'] = array(
-			'languages' => array(
+			'roles' => array(
 				'name'
 			)
 		);
@@ -26,46 +28,46 @@ class Domain_V1_Language_Controller extends Domain_Base_Controller {
 	}
 
 	/**
-	 * Get language by id
+	 * Get role by id
 	 *
 	 * @return Response
 	 */
-	public function get_language($id)
+	public function get_read($id)
 	{
 		return $this->get_single($id);
 	}
 
 	/**
-	 * Add language
+	 * Add role
 	 *
 	 * @return Response
 	 */
-	public function post_language()
+	public function post_create()
 	{
-		$language = $this->model();
+		$role = $this->model();
 
 		return $this->create_single(Input::all());
 	}
 
 	/**
-	 * Edit language
+	 * Edit role
 	 *
 	 * @return Response
 	 */
-	public function put_language($id)
+	public function put_update($id)
 	{
-		// Find the language we are updating
-		$language = $this->model($id);
+		// Find the role we are updating
+		$role = $this->model($id);
 
 		return $this->update_single(Input::all());
 	}
 
 	/**
-	 * Delete language
+	 * Delete role
 	 *
 	 * @return Response
 	 */
-	public function delete_language($id)
+	public function delete_delete($id)
 	{
 		$this->model($id);
 

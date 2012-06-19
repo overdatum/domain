@@ -2,7 +2,7 @@
 
 use Domain\Models\Page;
 
-class Domain_V1_Page_Controller extends Domain_Base_Controller {
+class Domain_Page_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
@@ -37,7 +37,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_page_all()
+	public function get_list()
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -71,7 +71,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_page($id)
+	public function get_read($id)
 	{
 		$this->includes = array('layout', 'versions');
 
@@ -83,7 +83,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function post_page()
+	public function post_create()
 	{
 		$page = $this->model();
 
@@ -95,7 +95,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function put_page($id)
+	public function put_update($id)
 	{
 		// Find the page we are updating
 		$page = $this->model($id);
@@ -108,7 +108,7 @@ class Domain_V1_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function delete_page($id)
+	public function delete_delete($id)
 	{
 		$this->model($id);
 

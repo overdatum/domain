@@ -1,12 +1,14 @@
 <?php
 
-use Domain\Models\MediaGroup;
+use Domain\Models\Asset;
 
-class Domain_V1_Mediagroup_Controller extends Domain_Base_Controller {
+class Domain_Media_Group_Asset_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new MediaGroup;
+		$this->model = new Asset;
+
+		$this->multilanguage = true;
 	}
 
 	/**
@@ -14,7 +16,7 @@ class Domain_V1_Mediagroup_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_mediagroup_all()
+	public function get_list()
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -22,14 +24,18 @@ class Domain_V1_Mediagroup_Controller extends Domain_Base_Controller {
 
 		$this->settings = array(
 			'sortable' => array(
-				'mediagroups' => array(
-					'name',
+				'assets' => array(
 					'created_at'
+				),
+				'asset_lang' => array(
+					'name',
+					'description',
 				)
 			),
 			'searchable' => array(
-				'mediagroups' => array(
-					'name'
+				'asset_lang' => array(
+					'name',
+					'description'
 				)
 			)
 		);

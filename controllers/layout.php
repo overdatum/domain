@@ -2,7 +2,7 @@
 
 use Domain\Models\Layout;
 
-class Domain_V1_Layout_Controller extends Domain_Base_Controller {
+class Domain_Layout_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
@@ -16,7 +16,7 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_layout_all()
+	public function get_list()
 	{
 		return $this->get_multiple();
 	}
@@ -26,7 +26,7 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_layout($id)
+	public function get_read($id)
 	{
 		return $this->get_single($id);
 	}
@@ -36,7 +36,7 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function post_layout()
+	public function post_create()
 	{
 		$layout = $this->model();
 
@@ -48,7 +48,7 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function put_layout($id)
+	public function put_update($id)
 	{
 		// Find the layout we are updating
 		$layout = $this->model($id);
@@ -61,7 +61,7 @@ class Domain_V1_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function delete_layout($id)
+	public function delete_delete($id)
 	{
 		$this->model($id);
 

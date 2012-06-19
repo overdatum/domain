@@ -1,6 +1,6 @@
 <?php
 
-class Domain_V1_Auth_Controller extends Domain_Base_Controller {
+class Domain_Auth_Controller extends Domain_Base_Controller {
 	
 	/**
 	 * Login
