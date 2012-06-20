@@ -11,8 +11,7 @@ class Domain_Add_Tables {
 	{
 		Schema::create('accounts', function($table)
 		{
-			$table->integer('id');
-			$table->integer('version');
+			$table->increments('id');
 			$table->string('email');
 			$table->string('password');
 			$table->string('name');
@@ -23,21 +22,9 @@ class Domain_Add_Tables {
 		DB::table('accounts')->insert(array(
 			'id' => 1,
 			'language_id' => 1,
-			'version' => 1,
 			'email' => 'admin@admin.com',
 			'password' => Hash::make('admin'),
 			'name' => 'Administrator',
-			'created_at' => new \DateTime,
-			'updated_at' => new \DateTime
-		));
-
-		DB::table('accounts')->insert(array(
-			'id' => 1,
-			'language_id' => 1,
-			'version' => 2,
-			'email' => 'admin@admin.com',
-			'password' => Hash::make('admin'),
-			'name' => 'Administratorke',
 			'created_at' => new \DateTime,
 			'updated_at' => new \DateTime
 		));
