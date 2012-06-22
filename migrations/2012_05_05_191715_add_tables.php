@@ -15,6 +15,7 @@ class Domain_Add_Tables {
 			$table->string('email');
 			$table->string('password');
 			$table->string('name');
+			$table->string('slug');
 			$table->integer('language_id');
 			$table->timestamps();
 		});
@@ -25,6 +26,7 @@ class Domain_Add_Tables {
 			'email' => 'admin@admin.com',
 			'password' => Hash::make('admin'),
 			'name' => 'Administrator',
+			'slug' => 'administrator',
 			'created_at' => new \DateTime,
 			'updated_at' => new \DateTime
 		));
@@ -100,9 +102,9 @@ class Domain_Add_Tables {
 		{
 			$table->increments('id');
 			$table->integer('page_id');
-			$table->integer('version');
 			$table->integer('language_id');
 			$table->integer('active');
+			$table->string('slug');
 			$table->string('url');
 			$table->string('meta_title');
 			$table->text('meta_keywords');
@@ -112,27 +114,13 @@ class Domain_Add_Tables {
 			$table->timestamps();
 		});
 
-		DB::table('page_lang')->insert(array(
-			'page_id' => 1,
-			'language_id' => 1,
-			'active' => 1,
-			'version' => 1,
-			'url' => 'home',
-			'meta_title' => 'Welcome to the *intentional typo* haha',
-			'meta_keywords' => 'home, welcome, start here, lol',
-			'meta_description' => 'Welcome to Layla\'s test website',
-			'menu' => 'Home',
-			'content' => 'Welcome to the homepage, bro',
-			'created_at' => new \DateTime,
-			'updated_at' => new \DateTime
-		));
 
 		DB::table('page_lang')->insert(array(
 			'page_id' => 1,
 			'language_id' => 2,
 			'active' => 0,
-			'version' => 1,
 			'url' => 'welkom',
+			'slug' => 'welkom',
 			'meta_title' => 'Welkom op de homepagina',
 			'meta_keywords' => 'welkom, begin hier, tja...',
 			'meta_description' => 'Welkom op Layla\'s test pagina',
@@ -146,8 +134,8 @@ class Domain_Add_Tables {
 			'page_id' => 1,
 			'language_id' => 1,
 			'active' => 0,
-			'version' => 2,
 			'url' => 'home',
+			'slug' => 'home',
 			'meta_title' => 'Welcome to the homepage',
 			'meta_keywords' => 'home, welcome, start here, lol',
 			'meta_description' => 'Welcome to Layla\'s test website',
@@ -161,8 +149,8 @@ class Domain_Add_Tables {
 			'page_id' => 2,
 			'language_id' => 1,
 			'active' => 1,
-			'version' => 1,
 			'url' => 'about-us',
+			'slug' => 'about-us',
 			'meta_title' => 'About Layla',
 			'meta_keywords' => 'about us, layla, what we do, blah, bla',
 			'meta_description' => 'We are Layla, blablabla',
@@ -176,8 +164,8 @@ class Domain_Add_Tables {
 			'page_id' => 2,
 			'language_id' => 2,
 			'active' => 0,
-			'version' => 1,
 			'url' => 'over-ons',
+			'slug' => 'over-ons',
 			'meta_title' => 'Over Layla',
 			'meta_keywords' => 'dit, gaat, over, ons',
 			'meta_description' => 'Layla doet dit en dat, zus en zo',
@@ -198,6 +186,7 @@ class Domain_Add_Tables {
 		{
 			$table->increments('id');
 			$table->integer('module_id');
+			$table->string('slug');
 			$table->string('name');
 			$table->timestamps();
 		});
@@ -206,24 +195,28 @@ class Domain_Add_Tables {
 			array(
 				'module_id' => 1,
 				'name' => 'Nederland - Portugal',
+				'slug' => 'nederland-portugal',
 				'created_at' => new \DateTime,
 				'updated_at' => new \DateTime
 			),
 			array(
 				'module_id' => 1,
 				'name' => 'Nederland - Germany',
+				'slug' => 'nederland-germany',
 				'created_at' => new \DateTime,
 				'updated_at' => new \DateTime
 			),
 			array(
 				'module_id' => 2,
 				'name' => 'Products',
+				'slug' => 'products',
 				'created_at' => new \DateTime,
 				'updated_at' => new \DateTime
 			),
 			array(
 				'module_id' => 2,
 				'name' => 'Categories',
+				'slug' => 'categories',
 				'created_at' => new \DateTime,
 				'updated_at' => new \DateTime
 			),
@@ -252,6 +245,7 @@ class Domain_Add_Tables {
 			$table->integer('asset_id');
 			$table->integer('language_id');
 			$table->string('name');
+			$table->string('slug');
 			$table->text('description');
 			$table->string('tags');
 			$table->timestamps();
@@ -263,6 +257,7 @@ class Domain_Add_Tables {
 			'name'       => 'Layla!',
 			'description' => 'Layla logo',
 			'tags'        => 'layla,logo',
+			'slug'		  => 'layla',
 			'created_at'  => new \DateTime,
 			'updated_at'  => new \DateTime
 		));
@@ -292,14 +287,17 @@ class Domain_Add_Tables {
 		{
 			$table->increments('id');
 			$table->string('name');
+			$table->string('slug');
 		});
 
 		DB::table('modules')->insert(array(
 			array(
-				'name' => 'Layla'
+				'name' => 'Layla',
+				'slug' => 'layla'
 			),
 			array(
-				'name' => 'Webshop'
+				'name' => 'Webshop',
+				'slug' => 'webshop'
 			)
 		));
 
@@ -318,12 +316,14 @@ class Domain_Add_Tables {
 			$table->increments('id');
 			$table->string('name');
 			$table->string('type'); // [webpage, stylesheet, javascript, partial]
+			$table->string('slug');
 			$table->text('content');
 		});
 
 		DB::table('layouts')->insert(array(
 			'name' => 'Default',
 			'type' => 'webpage',
+			'slug' => 'default',
 			'content' => '<html><head></head><body>this is the layout</body></html>',
 		));
 

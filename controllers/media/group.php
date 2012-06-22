@@ -14,7 +14,7 @@ class Domain_Media_Group_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list($module_id = null)
+	public function get_read_multiple($module_id = null)
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -34,7 +34,7 @@ class Domain_Media_Group_Controller extends Domain_Base_Controller {
 			)
 		);
 
-		return $this->get_multiple(Input::all());
+		return $this->read_multiple(Input::all());
 	}
 
 }

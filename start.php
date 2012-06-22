@@ -3,8 +3,6 @@
 use Layla\DBManager;
 use Layla\API;
 
-API::$component = 'domain';
-
 // --------------------------------------------------------------
 // Load helpers
 // --------------------------------------------------------------
@@ -72,10 +70,10 @@ Bundle::start('thirdparty_bob');
 // --------------------------------------------------------------
 Route::group(array('before' => 'api_auth'), function() use ($api_version)
 {
-	API::controller(array(
+	Route::api(array(
 		'module' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -85,7 +83,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'account' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -95,7 +93,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'page' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -105,7 +103,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'language' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -115,7 +113,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'role' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -125,7 +123,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'layout' => array(
 			array(
-				'list',
+				'read_multiple',
 				'create',
 				'read',
 				'update',
@@ -135,12 +133,12 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 		),
 		'media' => array(
 			array(
-				'list'
+				'read_multiple'
 			),
 			array(
 				'group' => array(
 					array(
-						'list',
+						'read_multiple',
 						'create',
 						'read',
 						'update',
@@ -149,7 +147,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 					array(
 						'asset' => array(
 							array(
-								'list',
+								'read_multiple',
 								'create',
 								'read',
 								'update',
@@ -161,7 +159,7 @@ Route::group(array('before' => 'api_auth'), function() use ($api_version)
 				)
 			)
 		)
-	));
+	), 'domain', 'api');
 });
 
 // --------------------------------------------------------------

@@ -10,8 +10,6 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 
 		$this->multilanguage = true;
 
-		$this->versioned = true;
-
 		$this->settings = array(
 			'relating' => array(
 				'page_lang' => array(
@@ -19,6 +17,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 					'language_id',
 					'active',
 					'url',
+					'slug',
 					'meta_title',
 					'meta_keywords',
 					'meta_description',
@@ -37,7 +36,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list()
+	public function get_read_multiple()
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -63,7 +62,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 
 		$this->includes = array('account');
 
-		return $this->get_multiple(Input::all());
+		return $this->read_multiple(Input::all());
 	}
 
 	/**
@@ -73,9 +72,9 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		$this->includes = array('layout', 'versions');
+		$this->includes = array('layout');
 
-		return $this->get_single($id);
+		return $this->read($id, Input::all());
 	}
 
 	/**
@@ -85,9 +84,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		$page = $this->model();
-
-		return $this->create_single(Input::all());
+		return $this->create(Input::all());
 	}
 
 	/**
@@ -97,10 +94,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		// Find the page we are updating
-		$page = $this->model($id);
-
-		return $this->update_single(Input::all());
+		return $this->update($id, Input::all());
 	}
 
 	/**
@@ -110,9 +104,7 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->model($id);
-
-		$this->delete_single();
+		return $this->delete($id, Input::all());
 	}
 
 }

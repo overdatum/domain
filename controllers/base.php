@@ -96,7 +96,7 @@ class Domain_Base_Controller extends Controller
 	 * 
 	 * @param array $input The user-defined options
 	 */
-	public function get_multiple($input)
+	public function read_multiple($input)
 	{
 		// Default settings
 		$this->settings = array_merge(array(
@@ -293,9 +293,9 @@ class Domain_Base_Controller extends Controller
 		return Response::json($response);
 	}
 
-	public function get_single($id)
+	public function read($id, $input)
 	{
-		$this->options = array_merge($this->options, Input::all());
+		$this->options = array_merge($this->options, $input);
 
 		$table = $this->model->table();
 
@@ -328,7 +328,12 @@ class Domain_Base_Controller extends Controller
 
 			$versioned = $this->versioned;
 
-			$version = isset($this->options['version']) ? $this->options['version'] : DB::table($language_table)->where($foreign_key, '=', $id)->max('version');
+			$version = null;
+
+			if($versioned)
+			{
+				$version = isset($this->options['version']) ? $this->options['version'] : DB::table($language_table)->where($foreign_key, '=', $this->model->id)->max('version');
+			}
 
 			// Add a join for the language table
 			$this->joins[] = array(
@@ -349,13 +354,15 @@ class Domain_Base_Controller extends Controller
 		{
 			if($this->versioned)
 			{
-				$version = isset($this->options['version']) ? $this->options['version'] : $this->model()->where_id($id)->max('version');
+				$version = isset($this->options['version']) ? $this->options['version'] : $this->model()->where_id($this->model->id)->max('version');
 	
 				$query = $query->where($table.'.version', '=', $version);
 			}
 		}
 
 		$query = $this->apply_joins($query);
+
+		$query = $this->find($query, $id);
 
 		$result = $query->first($this->get_columns);
 
@@ -375,7 +382,7 @@ class Domain_Base_Controller extends Controller
 		return Response::json($result);	
 	}
 
-	public function create_single($input, $sync = array())
+	public function create($input, $sync = array())
 	{
 		$model = $this->model;
 		
@@ -400,7 +407,7 @@ class Domain_Base_Controller extends Controller
 		}
 	}
 
-	public function update_single($input, $sync = array())
+	public function update($input, $sync = array())
 	{
 		$model = $this->model;
 		
@@ -419,7 +426,7 @@ class Domain_Base_Controller extends Controller
 		}
 	}
 
-	public function delete_single()
+	public function delete()
 	{
 		$this->model->delete();
 	}
@@ -436,14 +443,32 @@ class Domain_Base_Controller extends Controller
 		return Response::error('404');
 	}
 
-	protected function model($id = null)
+	protected function find($query, $id = null)
 	{
 		if( ! is_null($id))
 		{
-			$this->model = $this->model->where($this->model->table().'.id', '=', $id)->first();
-		}
+			if(is_numeric($id))
+			{
+				return $query->where($this->model->table().'.id', '=', $id);
+			}
+			else
+			{
+				if($this->multilanguage)
+				{
+					// Set the lowercase model name, without the namespace
+					$model = strtolower(class_basename($this->model));
 
-		return $this->model;
+					// Set the language table anme
+					$language_table = $model.'_lang';
+
+					return $query->where($language_table.'.slug', '=', $id);
+				}
+				else
+				{
+					return $query->where($this->model->table().'.slug', '=', $id);
+				}
+			}
+		}
 	}
 
 	protected function apply_mappings($result)

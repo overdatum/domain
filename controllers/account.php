@@ -14,7 +14,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list()
+	public function get_read_multiple()
 	{
 		$this->options = array(
 			'sort_by' => 'created_at',
@@ -39,7 +39,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 
 		$this->includes = array('roles', 'roles.lang', 'language');
 
-		return $this->get_multiple(Input::all());
+		return $this->read_multiple(Input::all());
 	}
 
 	/**
@@ -51,7 +51,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	{
 		$this->includes = array('roles', 'language');
 
-		return $this->get_single($id);
+		return $this->read($id, Input::all());
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		$account = $this->model();
+		$account = $this->model;
 
 		$account::$rules['password'] = 'required';
 		$account::$rules['email'] = 'required|email|unique:accounts,email';
@@ -72,7 +72,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 			'roles' => Input::get('roles')
 		);
 
-		return $this->create_single(Input::all(), $sync);
+		return $this->create(Input::all(), $sync);
 	}
 
 	/**
@@ -83,7 +83,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	public function put_update($id)
 	{
 		// Find the account we are updating
-		$account = $this->model($id);
+		$account = $this->model;
 
 		// If the password is set, we allow it to be updated
 		if(Input::get('password') !== '') $account::$accessible[] = 'password';
@@ -92,7 +92,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 			'roles' => Input::get('roles')
 		);
 			
-		return $this->update_single(Input::all(), $sync);
+		return $this->update($id, Input::all(), $sync);
 	}
 
 	/**
@@ -102,9 +102,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->model($id);
-
-		$this->delete_single();
+		$this->delete($id, Input::all());
 	}
 
 }

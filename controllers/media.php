@@ -20,9 +20,9 @@ class Domain_Media_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list()
+	public function get_read_multiple()
 	{
-		return $this->get_multiple(Input::all());
+		return $this->read_multiple(Input::all());
 	}
 
 }

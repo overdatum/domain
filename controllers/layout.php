@@ -7,8 +7,6 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->model = new Layout;
-
-		$this->versioned = true;
 	}
 
 	/**
@@ -16,9 +14,9 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list()
+	public function get_read_multiple()
 	{
-		return $this->get_multiple();
+		return $this->get_multiple(Input::all());
 	}
 
 	/**

@@ -14,7 +14,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	 *
 	 * @return Response
 	 */
-	public function get_list()
+	public function get_read_multiple()
 	{
 		$this->settings['sortable'] = array(
 			'languages' => array(
@@ -22,7 +22,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 			)
 		);
 
-		return $this->get_multiple(Input::all());
+		return $this->read_multiple(Input::all());
 	}
 
 	/**
@@ -32,7 +32,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		return $this->get_single($id);
+		return $this->read($id, Input::all());
 	}
 
 	/**
@@ -42,9 +42,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		$language = $this->model();
-
-		return $this->create_single(Input::all());
+		return $this->create(Input::all());
 	}
 
 	/**
@@ -54,10 +52,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		// Find the language we are updating
-		$language = $this->model($id);
-
-		return $this->update_single(Input::all());
+		return $this->update($id, Input::all());
 	}
 
 	/**
@@ -67,9 +62,7 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->model($id);
-
-		$this->delete_single();
+		$this->delete($id, Input::all());
 	}
 
 }
