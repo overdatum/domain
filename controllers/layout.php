@@ -1,12 +1,14 @@
 <?php
 
+use Domain\Libraries\DAL;
 use Domain\Models\Layout;
 
 class Domain_Layout_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Layout;
+		$this->dal = DAL::model(new Layout)
+			->versioned();
 	}
 
 	/**
@@ -16,7 +18,10 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read_multiple()
 	{
-		return $this->get_multiple(Input::all());
+		return $this->dal
+			->options(Input::all())
+			->read_multiple()
+			->response();
 	}
 
 	/**
@@ -26,7 +31,9 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		return $this->get_single($id);
+		return $this->dal
+			->read($id)
+			->response();
 	}
 
 	/**
@@ -36,9 +43,9 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		$layout = $this->model();
-
-		return $this->create_single(Input::all());
+		return $this->dal
+			->create(Input::all())
+			->response();
 	}
 
 	/**
@@ -48,10 +55,9 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		// Find the layout we are updating
-		$layout = $this->model($id);
-
-		return $this->update_single(Input::all());
+		return $this->dal
+			->update($id, Input::all())
+			->response();
 	}
 
 	/**
@@ -61,9 +67,9 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->model($id);
-
-		$this->delete_single();
+		return $this->dal
+			->delete($id)
+			->response();
 	}
 
 }

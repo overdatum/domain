@@ -45,12 +45,14 @@ class Domain_Add_Tables {
 		{
 			$table->increments('id');
 			$table->integer('role_id');
+			$table->integer('language_id');
 			$table->string('name');
 			$table->string('description');
 		});
 
 		DB::table('role_lang')->insert(array(
 			'role_id' => 1,
+			'language_id' => 1,
 			'name' => 'Admin',
 			'description' => 'Dee maag alles dee jong...'
 		));

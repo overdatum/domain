@@ -1,34 +1,54 @@
 <?php
 
+use Domain\Libraries\DAL;
 use Domain\Models\Page;
+use Domain\Models\PageLang;
 
 class Domain_Page_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Page;
-
-		$this->multilanguage = true;
-
-		$this->settings = array(
-			'relating' => array(
-				'page_lang' => array(
-					'id',
-					'language_id',
-					'active',
-					'url',
-					'slug',
-					'meta_title',
-					'meta_keywords',
-					'meta_description',
-					'menu',
-					'content',
-					'created_at',
-					'updated_at',
-					'created_at'
+		$this->dal = DAL::model(new Page)
+			->language_model(new PageLang)
+			->options(array(
+				'sort_by' => 'created_at',
+			))
+			->settings(array(
+				'relating' => array(
+					'page_lang' => array(
+						'id',
+						'language_id',
+						'active',
+						'url',
+						'slug',
+						'meta_title',
+						'meta_keywords',
+						'meta_description',
+						'menu',
+						'content',
+						'created_at',
+						'updated_at',
+						'created_at'
+					)
+				),
+				'sortable' => array(
+					'page_lang' => array(
+						'meta_title',
+						'menu',
+						'content',
+						'created_at',
+						'updated_at'
+					)
+				),
+				'searchable' => array(
+					'page_lang' => array(
+						'meta_title',
+						'menu',
+						'content'
+					)
 				)
-			)
-		);
+			))
+			->multilanguage();
 	}
 
 	/**
@@ -38,31 +58,11 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read_multiple()
 	{
-		$this->options = array(
-			'sort_by' => 'created_at',
-		);
-		
-		$this->settings['sortable'] = array(
-			'page_lang' => array(
-				'meta_title',
-				'menu',
-				'content',
-				'created_at',
-				'updated_at'
-			)
-		);
-
-		$this->settings['searchable'] = array(
-			'page_lang' => array(
-				'meta_title',
-				'menu',
-				'content'
-			)
-		);
-
-		$this->includes = array('account');
-
-		return $this->read_multiple(Input::all());
+		return $this->dal
+			->with('account')
+			->options(Input::all())
+			->read_multiple()
+			->response();
 	}
 
 	/**
@@ -72,9 +72,10 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		$this->includes = array('layout');
-
-		return $this->read($id, Input::all());
+		return $this->dal
+			->with(array('account', 'layout'))
+			->read($id)
+			->response();
 	}
 
 	/**
@@ -84,7 +85,9 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		return $this->create(Input::all());
+		return $this->dal
+			->create(Input::all())
+			->response();
 	}
 
 	/**
@@ -94,7 +97,9 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		return $this->update($id, Input::all());
+		return $this->dal
+			->update($id, Input::all())
+			->response();
 	}
 
 	/**
@@ -104,7 +109,9 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		return $this->delete($id, Input::all());
+		return $this->dal
+			->delete($id)
+			->response();
 	}
 
 }

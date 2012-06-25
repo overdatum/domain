@@ -6,33 +6,39 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Module;
-		
-		$this->settings['sortable'] = array(
-			'modules' => array(
-				'name'
-			)
-		);
+		$this->dal = DAL::model(new Module)
+			->settings(array(
+				'sortable' => array(
+					'modules' => array(
+						'name'
+					)
+				)
+			));
 	}
 
 	/**
-	 * Get all accounts
+	 * Get all modules
 	 *
 	 * @return Response
 	 */
 	public function get_read_multiple()
 	{
-		return $this->get_multiple(Input::all());
+		return $this->dal
+			->options(Input::all())
+			->read_multiple()
+			->response();
 	}
 
 	/**
-	 * Get account by id
+	 * Get module by id
 	 *
 	 * @return Response
 	 */
 	public function get_read($id)
 	{
-		return $this->get_single($id);
+		return $this->dal
+			->read($id)
+			->response();
 	}
 
 	/**
@@ -42,9 +48,6 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	 */
 	public function post_module_create()
 	{
-		new Generators_Model(array('module_blog_domain::bam', 'has_many:assholes'));
-
-		//$this->insert_module();
 	}
 
 	/**
@@ -52,7 +55,6 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	 */
 	public function post_module_install()
 	{
-
 	}
 
 	/**
@@ -62,9 +64,9 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		$this->model($id);
-
-		return $this->update_single(Input::all());
+		return $this->dal
+			->update($id, Input::all())
+			->response();
 	}
 
 	/**
@@ -74,9 +76,9 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->model($id);
-
-		$this->delete_single();
+		$this->dal
+			->delete()
+			->response();
 	}
 
 }

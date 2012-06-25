@@ -1,5 +1,6 @@
 <?php
 
+use Domain\Libraries\DAL;
 use Domain\Models\Account;
 
 class Domain_Account_Controller extends Domain_Base_Controller {
@@ -7,6 +8,27 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->model = new Account;
+
+		$this->dal = DAL::model(new Account)
+			->options(array(
+				'sort_by' => 'created_at',
+			))
+			->settings(array(
+				'sortable' => array(
+					'accounts' => array(
+						'name',
+						'email',
+						'created_at',
+						'updated_at'
+					)
+				),
+				'searchable' => array(
+					'accounts' => array(
+						'name',
+						'email'
+					)
+				)
+			));
 	}
 
 	/**
@@ -16,30 +38,11 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read_multiple()
 	{
-		$this->options = array(
-			'sort_by' => 'created_at',
-		);
-
-		$this->settings = array(
-			'sortable' => array(
-				'accounts' => array(
-					'name',
-					'email',
-					'created_at',
-					'updated_at'
-				)
-			),
-			'searchable' => array(
-				'page_lang' => array(
-					'name',
-					'email'
-				)
-			)
-		);
-
-		$this->includes = array('roles', 'roles.lang', 'language');
-
-		return $this->read_multiple(Input::all());
+		return $this->dal
+			->with(array('roles', 'roles.lang', 'language'))
+			->options(Input::all())
+			->read_multiple()
+			->response();
 	}
 
 	/**
@@ -49,9 +52,9 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		$this->includes = array('roles', 'language');
+		$this->dal->with(array('roles', 'language'));
 
-		return $this->read($id, Input::all());
+		return $this->dal->read($id)->response();
 	}
 
 	/**
@@ -61,18 +64,16 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function post_create()
 	{
-		$account = $this->model;
+		Account::$rules['password'] = 'required';
+		Account::$rules['email'] = 'required|email|unique:accounts,email';
 
-		$account::$rules['password'] = 'required';
-		$account::$rules['email'] = 'required|email|unique:accounts,email';
+		Account::$accessible[] = 'password';
 
-		$account::$accessible[] = 'password';
+		$this->dal->sync(array(
+			'roles'
+		));
 
-		$sync = array(
-			'roles' => Input::get('roles')
-		);
-
-		return $this->create(Input::all(), $sync);
+		return $this->dal->create(Input::all());
 	}
 
 	/**
@@ -82,17 +83,14 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function put_update($id)
 	{
-		// Find the account we are updating
-		$account = $this->model;
-
 		// If the password is set, we allow it to be updated
-		if(Input::get('password') !== '') $account::$accessible[] = 'password';
+		if(Input::get('password') !== '') Account::$accessible[] = 'password';
 
-		$sync = array(
-			'roles' => Input::get('roles')
-		);
+		$this->dal->sync(array(
+			'roles'
+		));
 			
-		return $this->update($id, Input::all(), $sync);
+		return $this->dal->update($id, Input::all())->response();
 	}
 
 	/**
@@ -102,7 +100,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		$this->delete($id, Input::all());
+		return $this->dal->delete($id)->response();
 	}
 
 }
