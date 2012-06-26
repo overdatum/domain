@@ -10,7 +10,13 @@ class Account extends Eloquent {
 
 	public static $table = 'accounts';
 
-	public static $accessible = array('name', 'email', 'language_id', 'id');
+	public static $accessible = array(
+		'name',
+		'email',
+		'language_id',
+		'id',
+		'slug'
+	);
 
 	public static $versioned = true;
 

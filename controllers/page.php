@@ -48,7 +48,9 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 					)
 				)
 			))
-			->multilanguage();
+			->versioned()
+			->multilanguage()
+			->slug('url');
 	}
 
 	/**

@@ -8,7 +8,8 @@ class PageLang extends Eloquent {
 
 	public function versions()
 	{
-		return $this->has_many('Domain\\Models\\PageLang', 'id')->order_by('version', 'DESC');
+		return $this->has_many('Domain\\Models\\PageLang', 'id')
+			->order_by('version', 'DESC');
 	}
 
 }

@@ -8,12 +8,13 @@ class Domain_Layout_Controller extends Domain_Base_Controller {
 	public function __construct()
 	{
 		$this->dal = DAL::model(new Layout)
-			->versioned();
+			->versioned()
+			->slug('name');
 	}
 
 	/**
 	 * Get all layouts
-	 *
+	 *s
 	 * @return Response
 	 */
 	public function get_read_multiple()

@@ -7,8 +7,6 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	
 	public function __construct()
 	{
-		$this->model = new Account;
-
 		$this->dal = DAL::model(new Account)
 			->options(array(
 				'sort_by' => 'created_at',
@@ -28,7 +26,8 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 						'email'
 					)
 				)
-			));
+			))
+			->slug('name');
 	}
 
 	/**
@@ -52,9 +51,10 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function get_read($id)
 	{
-		$this->dal->with(array('roles', 'language'));
-
-		return $this->dal->read($id)->response();
+		return $this->dal
+			->with(array('roles', 'language'))
+			->read($id)
+			->response();
 	}
 
 	/**
@@ -73,7 +73,9 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 			'roles'
 		));
 
-		return $this->dal->create(Input::all());
+		return $this->dal
+			->create(Input::all())
+			->response();
 	}
 
 	/**
@@ -86,11 +88,12 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 		// If the password is set, we allow it to be updated
 		if(Input::get('password') !== '') Account::$accessible[] = 'password';
 
-		$this->dal->sync(array(
-			'roles'
-		));
-			
-		return $this->dal->update($id, Input::all())->response();
+		return $this->dal
+			->sync(array(
+				'roles'
+			))
+			->update($id, Input::all())
+			->response();
 	}
 
 	/**
@@ -100,7 +103,9 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	 */
 	public function delete_delete($id)
 	{
-		return $this->dal->delete($id)->response();
+		return $this->dal
+			->delete($id)
+			->response();
 	}
 
 }

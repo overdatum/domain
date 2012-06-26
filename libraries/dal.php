@@ -19,20 +19,13 @@
 
 namespace Domain\Libraries;
 
+use StdClass;
+
+use Laravel\Str;
 use Laravel\Database as DB;
 
 use Layla\DBManager;
 
-/**
- * DELETE 	resource/:id
- * DELETE 	resources
- * PUT 		resource/:id
- * PUT 		resources
- * POST 	resource
- * POST 	resources
- * GET 		resource/:id
- * GET 		resources
- */
 
 /**
 * This DAL class provides methods for setting up a secured,
@@ -47,12 +40,32 @@ class DAL {
 	 */
 	public $model;
 
+	/**
+	 * The model's table
+	 * 
+	 * @var string
+	 */
 	public $table;
 
+	/**
+	 * The language model
+	 * 
+	 * @var Database\Eloquent\Model
+	 */
 	public $language_model;
 
+	/**
+	 * The language table
+	 * 
+	 * @var string
+	 */
 	public $language_table;
 
+	/**
+	 * The language table's foreign key
+	 * 
+	 * @var string
+	 */
 	public $language_table_foreign_key;
 
 	/**
@@ -67,14 +80,23 @@ class DAL {
 
 	/**
 	 * The input
+	 * 
+	 * @var array
 	 */
 	public $input;
 
 	/**
 	 * The response code
+	 * 
+	 * @var int
 	 */
 	public $code = 200;
 
+	/**
+	 * The settings
+	 * 
+	 * @var array
+	 */
 	public $settings = array(
 		'relating' => array(),
 		'sortable' => array(),
@@ -100,6 +122,13 @@ class DAL {
 	);
 
 	/**
+	 * Filters are used to limit the results
+	 */
+	public $filters = array(
+		'language_id' => 1
+	);
+
+	/**
 	 * Indicates if a language table should be joined or included
 	 * 
 	 * The table will be joined in case there is no search or order
@@ -122,6 +151,19 @@ class DAL {
 	 */
 	public $versioned = false;
 
+	/**
+	 * Indicates if slug is enabled and from
+	 * what column it should be generated
+	 * 
+	 * @var string
+	 */
+	public $slug;
+
+	/**
+	 * The relationships that have to be synced
+	 * 
+	 * @var array
+	 */
 	public $sync = array();
 
 	/**
@@ -138,8 +180,18 @@ class DAL {
 	 */
 	public $joins = array();
 
+	/**
+	 * The columns on joined tables that will be mapped
+	 * 
+	 * @var array
+	 */
 	public $mapped_columns = array();
 
+	/**
+	 * The fields that will be retrieved
+	 * 
+	 * @var array
+	 */
 	public $get_columns = array();
 
 	public function __construct($model = null)
@@ -155,11 +207,21 @@ class DAL {
 		}
 	}
 
+	/**
+	 * Method for retrieving a DAL instance
+	 * 
+	 * @param $model the model to work with
+	 */
 	public static function model($model)
 	{
-		return new Dal($model);
+		return new DAL($model);
 	}
 
+	/**
+	 * Method for setting the language model
+	 * 
+	 * @param $language_model the language model
+	 */
 	public function language_model($language_model)
 	{
 		$this->language_model = $language_model;
@@ -167,6 +229,11 @@ class DAL {
 		return $this;
 	}
 
+	/**
+	 * Method for merging settings
+	 * 
+	 * @var array the settings
+	 */
 	public function settings($settings)
 	{
 		$this->settings = array_merge($this->settings, $settings);
@@ -174,6 +241,11 @@ class DAL {
 		return $this;
 	}
 
+	/**
+	 * Method for merging options
+	 * 
+	 * @var array the options
+	 */
 	public function options($options)
 	{
 		$this->options = array_merge($this->options, $options);
@@ -181,9 +253,14 @@ class DAL {
 		return $this;
 	}
 
+	/**
+	 * Method for merging filters
+	 * 
+	 * @var array the settings
+	 */
 	public function filter($filters)
 	{
-		$this->filters = $filters;
+		$this->filters = array_merge($this->filters, $filters);
 
 		return $this;
 	}
@@ -214,11 +291,18 @@ class DAL {
 		return $this;
 	}
 
-	public function parent($table, $id)
+	public function slug($slug = '')
 	{
-		$this->parent = new StdClass;
-		$this->parent->table = $table;
-		$this->parent->id = $id;
+		$this->slug = $slug;
+
+		return $this;
+	}
+
+	public function parent($parent)
+	{
+		$this->parent = $parent;
+
+		return $this;
 	}
 
 	public function sync($sync = null)
@@ -363,7 +447,12 @@ class DAL {
 
 			if($versioned)
 			{
-				$version = isset($this->options['version']) ? $this->options['version'] : DB::table($language_table)->where($language_table_foreign_key, '=', $id)->max('version');
+				$version = isset($this->options['version']) ? 
+						$this->options['version'] 
+					:
+						DB::table($language_table)
+							->where($language_table_foreign_key, '=', $id)
+							->max('version');
 			}
 
 			// Add a join for the language table
@@ -385,7 +474,12 @@ class DAL {
 		{
 			if($this->versioned)
 			{
-				$version = isset($this->options['version']) ? $this->options['version'] : $this->model->where_id($this->model->id)->max('version');
+				$version = isset($this->options['version']) ?
+						$this->options['version']
+					:
+						$this->model
+							->where_id($this->model->id)
+							->max('version');
 	
 				$this->model = $this->model->where($table.'.version', '=', $version);
 			}
@@ -400,13 +494,19 @@ class DAL {
 		return $this;
 	}
 
-	public function create_multiple($input)
+	public function create_multiple($inputs)
 	{
-		foreach ($input as $row)
+		foreach ($inputs as $id => $input)
 		{
 			$dal = clone $this;
 
-			$dal->create($row);
+			if($this->parent)
+			{
+				$input['language_id'] = $id;
+				$input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
+			}
+
+			$dal->create($input);
 
 			if($dal->code === 400)
 			{
@@ -421,6 +521,16 @@ class DAL {
 	public function create($input)
 	{
 		$this->input = $input;
+
+		if( ! $this->multilanguage && ( ! is_null($this->slug) || (isset($this->parent) && ! is_null($this->parent))))
+		{
+			$key = isset($this->parent) && ! is_null($this->parent) ?
+					$this->parent->slug
+				:
+					$this->slug;
+
+			$input['slug'] = Str::slug($input[$key]); 
+		}
 
 		// Fill the model with data
 		$this->model->fill($input);
@@ -438,13 +548,9 @@ class DAL {
 
 		if($this->multilanguage)
 		{
-			foreach ($input['lang'] as $id => $data)
-			{
-				$input['lang'][$id]['language_id'] = $id;
-				$input['lang'][$id][$this->language_table_foreign_key] = $this->model->id;
-			}
-
-			DAL::model($this->language_model)
+			DAL::model(clone $this->language_model)
+				->parent($this)
+				->versioned($this->versioned)
 				->create_multiple($input['lang']);
 		}
 		
@@ -454,13 +560,23 @@ class DAL {
 		return $this;
 	}
 
-	public function update_multiple($input)
+	public function update_multiple($inputs)
 	{
-		foreach ($input as $row)
+		foreach ($inputs as $id => $input)
 		{
 			$dal = clone $this;
 
-			$dal->update($row);
+			if($this->parent)
+			{
+				$input['language_id'] = $id;
+				$id = $this->parent->model->id;			
+			}
+			else
+			{
+				$id = $input['id'];
+			}
+
+			$dal->update($id, $input);
 
 			if($dal->code === 400)
 			{
@@ -480,7 +596,7 @@ class DAL {
 		{
 			if($this->parent)
 			{
-				$input[$this->parent->foreign_key] = $this->parent->id;
+				$input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
 
 				$this->create($input);
 			}
@@ -489,9 +605,6 @@ class DAL {
 		}
 
 		$this->model = $this->model->first();
-		
-		// Create a new Object
-		$this->model->fill($input);
 
 		if($this->versioned && ! $this->multilanguage)
 		{
@@ -503,6 +616,36 @@ class DAL {
 			$this->model->exists = false;
 		}
 
+		if($this->multilanguage)
+		{
+			$dal = DAL::model(clone $this->language_model)
+				->parent($this)
+				->versioned($this->versioned)
+				->update_multiple($input['lang']);
+
+			if( ! $dal->code == 200)
+			{
+				$this->data = $dal->data;
+				$this->code = $dal->code;
+
+				return $this;
+			}
+
+			unset($input['lang']);
+		}
+		elseif( ! is_null($this->slug) || (isset($this->parent) && ! is_null($this->parent)))
+		{
+			$key = isset($this->parent) && ! is_null($this->parent) ?
+					$this->parent->slug
+				:
+					$this->slug;
+
+			$input['slug'] = Str::slug($input[$key]); 
+		}
+
+		// Fill the model
+		$this->model->fill($input);
+
 		// Try to save
 		if($this->model->save() === false)
 		{
@@ -511,14 +654,6 @@ class DAL {
 		}
 
 		$this->sync();
-
-		if($this->multilanguage)
-		{
-			DAL::model($this->language_model)
-				->parent($this->language_table_foreign_key, $id)
-				->versioned($this->versioned)
-				->update_multiple($input['lang']);
-		}
 
 		return $this;
 	}
@@ -583,13 +718,25 @@ class DAL {
 		return $this->data[$key];
 	}
 
-	protected function find($id, $single_language = false)
+	protected function find($id)
 	{
+		$column = 'id';
+
 		if( ! is_numeric($id))
 		{
+			if(is_null($this->slug))
+			{
+				$this->code = 404;
+				$this->data = 'You are trying to retrieve data with a slug from a resource that is not retrievable via a slug';
+
+				return false;
+			}
+
 			if($this->multilanguage)
 			{
-				$language_row = DB::table($this->language_table)->where_slug($id)->first(array($this->language_table_foreign_key));
+				$language_row = DB::table($this->language_table)
+					->where_slug($id)
+					->first(array($this->language_table_foreign_key));
 				
 				if(is_null($language_row))
 				{
@@ -605,7 +752,7 @@ class DAL {
 				$column = 'slug';
 			}
 		}
-		elseif($this->multilanguage)
+		elseif($this->parent && $this->parent->multilanguage)
 		{
 			if( ! $this->input['language_id'])
 			{
@@ -616,6 +763,8 @@ class DAL {
 			}
 
 			$this->model = $this->model->where($this->table.'.language_id', '=', $this->input['language_id']);
+
+			$column = $this->parent->language_table_foreign_key;
 		}
 
 		$this->model = $this->model->where($this->table.'.'.$column, '=', $id);
@@ -650,16 +799,19 @@ class DAL {
 					$alias_name = $table;
 				}
 
-				if ( ! isset($this->settings['relating'][$table_name]))
+				if($alias_name !== 'max')
 				{
-					$this->settings['relating'][$table_name] = $this->get_columns($table_name);
-				}
+					if ( ! isset($this->settings['relating'][$table_name]))
+					{
+						$this->settings['relating'][$table_name] = $this->get_columns($table_name);
+					}
 
-				foreach ($this->settings['relating'][$table_name] as $column)
-				{
-					$this->mapped_columns[$alias_name][$column] = 'temp_'.$alias_name.'_'.$column;
+					foreach ($this->settings['relating'][$table_name] as $column)
+					{
+						$this->mapped_columns[$alias_name][$column] = 'temp_'.$alias_name.'_'.$column;
 
-					$this->get_columns[] = $alias_name.'.'.$column.' AS '. 'temp_'.$alias_name.'_'.$column;
+						$this->get_columns[] = $alias_name.'.'.$column.' AS '. 'temp_'.$alias_name.'_'.$column;
+					}
 				}
 
 				$defaults = array(

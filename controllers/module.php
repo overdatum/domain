@@ -13,7 +13,8 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 						'name'
 					)
 				)
-			));
+			))
+			->slug('name');
 	}
 
 	/**
