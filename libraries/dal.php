@@ -83,7 +83,7 @@ class DAL {
 	 * 
 	 * @var array
 	 */
-	public $input;
+	public $input = array();
 
 	/**
 	 * The response code
@@ -122,13 +122,6 @@ class DAL {
 	);
 
 	/**
-	 * Filters are used to limit the results
-	 */
-	public $filters = array(
-		'language_id' => 1
-	);
-
-	/**
 	 * Indicates if a language table should be joined or included
 	 * 
 	 * The table will be joined in case there is no search or order
@@ -158,6 +151,16 @@ class DAL {
 	 * @var string
 	 */
 	public $slug;
+
+	/**
+	 * The model's id
+	 */
+	public $id;
+
+	/**
+	 * The language_id
+	 */
+	public $language_id;
 
 	/**
 	 * The relationships that have to be synced
@@ -236,7 +239,7 @@ class DAL {
 	 */
 	public function settings($settings)
 	{
-		$this->settings = array_merge($this->settings, $settings);
+		$this->settings = array_replace_recursive($this->settings, $settings);
 
 		return $this;
 	}
@@ -248,19 +251,28 @@ class DAL {
 	 */
 	public function options($options)
 	{
-		$this->options = array_merge($this->options, $options);
+		$this->options = array_replace_recursive($this->options, $options);
+
+		return $this;
+	}
+
+	public function filter($filter)
+	{
+		$this->input = array_replace_recursive($this->input, array(
+			'filter' => $filter
+		));
 
 		return $this;
 	}
 
 	/**
-	 * Method for merging filters
+	 * Method for merging input
 	 * 
-	 * @var array the settings
+	 * @var array the input
 	 */
-	public function filter($filters)
+	public function input($input)
 	{
-		$this->filters = array_merge($this->filters, $filters);
+		$this->input = array_replace_recursive($this->input, $input);
 
 		return $this;
 	}
@@ -439,36 +451,54 @@ class DAL {
 
 		if($this->multilanguage)
 		{
-			$table = $this->table;
-			$language_table = $this->language_table;
-			$language_table_foreign_key = $this->language_table_foreign_key;
-			$versioned = $this->versioned;
 			$version = null;
 
-			if($versioned)
+			if($this->versioned)
 			{
 				$version = isset($this->options['version']) ? 
 						$this->options['version'] 
 					:
-						DB::table($language_table)
-							->where($language_table_foreign_key, '=', $id)
+						DB::table($this->language_table)
+							->where($this->language_table_foreign_key, '=', $this->id)
 							->max('version');
 			}
 
-			// Add a join for the language table
-			$this->joins[] = array(
-				'table' => $language_table,
-				'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key, $versioned, $version)
-				{
-					$join->on($table.'.id', '=', $language_table.'.'.$language_table_foreign_key);
-					$join->on($language_table.'.language_id', '=', 1);
-
-					if($versioned)
+			if( ! isset($this->options['language_id']))
+			{
+				$this->model->model->with(array(
+					'lang' => function($query) use ($version)
 					{
-						$join->on($language_table.'.version', '=', DB::raw($version));
+						if( ! is_null($version))
+						{
+							$query->where_version($version);
+						}
 					}
-				})
-			);
+				));
+			}
+			else
+			{
+				// Some data for the closure
+				$table = $this->table;
+				$language_table = $this->language_table;
+				$language_table_foreign_key = $this->language_table_foreign_key;
+				$language_id = $this->options['language_id'];
+				$versioned = $this->versioned;
+
+				// Add a join for the language table
+				$this->joins[] = array(
+					'table' => $language_table,
+					'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key, $language_id, $versioned, $version)
+					{
+						$join->on($table.'.id', '=', $language_table.'.'.$language_table_foreign_key);
+						$join->on($language_table.'.language_id', '=', DB::raw($language_id));
+
+						if($versioned)
+						{
+							$join->on($language_table.'.version', '=', DB::raw($version));
+						}
+					})
+				);
+			}
 		}
 		else
 		{
@@ -478,7 +508,7 @@ class DAL {
 						$this->options['version']
 					:
 						$this->model
-							->where_id($this->model->id)
+							->where_id($this->id)
 							->max('version');
 	
 				$this->model = $this->model->where($table.'.version', '=', $version);
@@ -494,11 +524,13 @@ class DAL {
 		return $this;
 	}
 
-	public function create_multiple($inputs)
+	public function create_multiple()
 	{
-		foreach ($inputs as $id => $input)
+		foreach ($this->input as $id => $input)
 		{
 			$dal = clone $this;
+
+			$dal->input = $input;
 
 			if($this->parent)
 			{
@@ -506,7 +538,8 @@ class DAL {
 				$input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
 			}
 
-			$dal->create($input);
+			$dal->input($input)
+				->create();
 
 			if($dal->code === 400)
 			{
@@ -518,10 +551,8 @@ class DAL {
 		return $this;
 	}
 
-	public function create($input)
+	public function create()
 	{
-		$this->input = $input;
-
 		if( ! $this->multilanguage && ( ! is_null($this->slug) || (isset($this->parent) && ! is_null($this->parent))))
 		{
 			$key = isset($this->parent) && ! is_null($this->parent) ?
@@ -529,11 +560,11 @@ class DAL {
 				:
 					$this->slug;
 
-			$input['slug'] = Str::slug($input[$key]); 
+			$this->input['slug'] = Str::slug($this->input[$key]); 
 		}
 
 		// Fill the model with data
-		$this->model->fill($input);
+		$this->model->fill($this->input);
 
 		// Try to save
 		if($this->model->save() === false)
@@ -551,7 +582,8 @@ class DAL {
 			DAL::model(clone $this->language_model)
 				->parent($this)
 				->versioned($this->versioned)
-				->create_multiple($input['lang']);
+				->input($this->input['lang'])
+				->create_multiple();
 		}
 		
 		// Set the model's id as data
@@ -560,23 +592,26 @@ class DAL {
 		return $this;
 	}
 
-	public function update_multiple($inputs)
+	public function update_multiple()
 	{
-		foreach ($inputs as $id => $input)
+		foreach ($this->input as $id => $input)
 		{
 			$dal = clone $this;
 
-			if($this->parent)
+			$dal->input = $input;
+
+			if( ! is_null($this->parent))
 			{
 				$input['language_id'] = $id;
-				$id = $this->parent->model->id;			
+				$id = $this->parent->model->id;	
 			}
 			else
 			{
-				$id = $input['id'];
+				$id = $this->input['id'];
 			}
 
-			$dal->update($id, $input);
+			$dal->input($input)
+				->update($id, true);
 
 			if($dal->code === 400)
 			{
@@ -588,17 +623,15 @@ class DAL {
 		return $this;
 	}
 
-	public function update($id, $input)
+	public function update($id, $bla = false)
 	{
-		$this->input = $input;
-
 		if( ! $this->find($id))
 		{
 			if($this->parent)
 			{
-				$input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
+				$this->input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
 
-				$this->create($input);
+				$this->create();
 			}
 
 			return $this;
@@ -621,7 +654,8 @@ class DAL {
 			$dal = DAL::model(clone $this->language_model)
 				->parent($this)
 				->versioned($this->versioned)
-				->update_multiple($input['lang']);
+				->input($this->input['lang'])
+				->update_multiple();
 
 			if( ! $dal->code == 200)
 			{
@@ -631,7 +665,7 @@ class DAL {
 				return $this;
 			}
 
-			unset($input['lang']);
+			unset($this->input['lang']);
 		}
 		elseif( ! is_null($this->slug) || (isset($this->parent) && ! is_null($this->parent)))
 		{
@@ -640,11 +674,11 @@ class DAL {
 				:
 					$this->slug;
 
-			$input['slug'] = Str::slug($input[$key]); 
+			$this->input['slug'] = Str::slug($this->input[$key]); 
 		}
 
 		// Fill the model
-		$this->model->fill($input);
+		$this->model->fill($this->input);
 
 		// Try to save
 		if($this->model->save() === false)
@@ -691,15 +725,15 @@ class DAL {
 		return Response::json(is_null($this->data) ? '' : $this->data, $this->code);
 	}
 
-    public function __clone()
-    {
-        $this->model = clone $this->model;
-        
-        if( ! is_null($this->language_model))
-        {
-        	$this->language_model = clone $this->language_model;
-        }
-    }
+	public function __clone()
+	{
+		$this->model = clone $this->model;
+
+		if( ! is_null($this->language_model))
+		{
+		$this->language_model = clone $this->language_model;
+		}
+	}
 
 	public function __call($method, $parameters)
 	{
@@ -736,7 +770,7 @@ class DAL {
 			{
 				$language_row = DB::table($this->language_table)
 					->where_slug($id)
-					->first(array($this->language_table_foreign_key));
+					->first(array($this->language_table_foreign_key, 'language_id'));
 				
 				if(is_null($language_row))
 				{
@@ -745,6 +779,10 @@ class DAL {
 				else
 				{
 					$id = $language_row->{$this->language_table_foreign_key};
+
+					$this->options(array(
+						'language_id' => $language_row->language_id
+					));
 				}
 			}
 			else
@@ -762,10 +800,14 @@ class DAL {
 				return false;
 			}
 
+			$this->language_id = $this->input['language_id'];
+
 			$this->model = $this->model->where($this->table.'.language_id', '=', $this->input['language_id']);
 
 			$column = $this->parent->language_table_foreign_key;
 		}
+
+		$this->id = $id;
 
 		$this->model = $this->model->where($this->table.'.'.$column, '=', $id);
 
