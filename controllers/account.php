@@ -53,6 +53,7 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 	{
 		return $this->dal
 			->with(array('roles', 'language'))
+			->options(Input::all())
 			->read($id)
 			->response();
 	}
@@ -74,7 +75,8 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 		));
 
 		return $this->dal
-			->create(Input::all())
+			->input(Input::all())
+			->create()
 			->response();
 	}
 
@@ -92,7 +94,8 @@ class Domain_Account_Controller extends Domain_Base_Controller {
 			->sync(array(
 				'roles'
 			))
-			->update($id, Input::all())
+			->input(Input::all())
+			->update($id)
 			->response();
 	}
 

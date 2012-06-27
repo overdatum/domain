@@ -66,7 +66,8 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	public function put_update($id)
 	{
 		return $this->dal
-			->update($id, Input::all())
+			->input(Input::all())
+			->update($id)
 			->response();
 	}
 
@@ -78,7 +79,7 @@ class Domain_Module_Controller extends Domain_Base_Controller {
 	public function delete_delete($id)
 	{
 		$this->dal
-			->delete()
+			->delete($id)
 			->response();
 	}
 

@@ -51,7 +51,8 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	public function post_create()
 	{
 		return $this->dal
-			->create(Input::all())
+			->input(Input::all())
+			->create()
 			->response();
 	}
 
@@ -63,7 +64,8 @@ class Domain_Language_Controller extends Domain_Base_Controller {
 	public function put_update($id)
 	{
 		return $this->dal
-			->update($id, Input::all())
+			->input(Input::all())
+			->update($id)
 			->response();
 	}
 

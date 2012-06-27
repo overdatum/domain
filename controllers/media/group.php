@@ -34,10 +34,10 @@ class Domain_Media_Group_Controller extends Domain_Base_Controller {
 	public function get_read_multiple($module_id = null)
 	{
 		return $this->dal
-			->filter(array(
-				'module_id' => $module_id
-			))
 			->options(Input::all())
+			->filter(array(
+				'module_id', $module_id
+			))
 			->read_multiple()
 			->response();
 	}
