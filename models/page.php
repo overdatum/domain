@@ -9,9 +9,14 @@ class Page extends Eloquent {
 		return $this->belongs_to('Domain\\Models\\Layout');
 	}
 
+	public function languages()
+	{
+		return $this->has_many('Domain\\Models\\PageLang');
+	}
+
 	public function lang()
 	{
-		return $this->has_many('Domain\\Models\\PageLang')->where_language_id(1);
+		return $this->has_one('Domain\\Models\\PageLang');
 	}
 
 	public function account()
