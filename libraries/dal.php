@@ -115,6 +115,8 @@ class DAL {
 		'limit' => 20,
 		'sort_by' => 'name',
 		'order' => 'ASC',
+		'filter' => array(
+		),
 		'search' => array(
 			'string' => '',
 			'columns' => array()
@@ -258,9 +260,7 @@ class DAL {
 
 	public function filter($filter)
 	{
-		$this->input = array_replace_recursive($this->input, array(
-			'filter' => $filter
-		));
+		$this->options['filter'] = array_replace_recursive($this->options['filter'], $filter);
 
 		return $this;
 	}
@@ -291,6 +291,8 @@ class DAL {
 
 			// Set the language table's foreign key
 			$this->language_table_foreign_key = $basename.'_id';
+
+			$this->settings['filterable'][$this->language_table][] = 'language_id';
 		}
 
 		return $this;
@@ -321,7 +323,7 @@ class DAL {
 	{
 		if(is_null($sync))
 		{
-			foreach ($this->sync as $relationship)
+			foreach($this->sync as $relationship)
 			{
 				$this->model->$relationship()->sync($this->input[$relationship] ? array_flip(array_filter(array_flip($this->input[$relationship]), 'strlen')) : array());	
 			}
@@ -347,6 +349,8 @@ class DAL {
 		// Multilanguage, lets check if we need to join the records (for search or sort)
 		if ($this->multilanguage)
 		{
+			$filters = $this->get_filters($this->language_table);
+
 			// Find out if we need a join
 			if ($this->needs_join($this->language_table) || $this->versioned)
 			{
@@ -357,8 +361,15 @@ class DAL {
 				// Add a join for the language table
 				$this->joins[] = array(
 					'table' => $language_table,
-					'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key)
+					'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key, $filters)
 					{
+						foreach($filters as $filter)
+						{
+							list($table, $column, $value) = $filter;
+
+							$join->where($table.'.'.$column, '=', $value);
+						}
+
 						$join->on($table.'.id', '=', $language_table.'.'.$language_table_foreign_key);
 						$join->on($language_table.'.language_id', '=', 1);
 					})
@@ -370,8 +381,15 @@ class DAL {
 					// the language rows at the latest version
 					$this->joins[] = array(
 						'table' => $language_table.' AS max',
-						'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key)
+						'join' => array(function($join) use ($table, $language_table, $language_table_foreign_key, $filters)
 						{
+							foreach($filters as $filter)
+							{
+								list($table, $column, $value) = $filter;
+
+								$join->where($table.'.'.$column, '=', $value);
+							}
+
 							$join->on($table.'.id', '=', 'max.'.$language_table_foreign_key);
 							$join->on('max.version', '>', $language_table.'.version');
 							$join->on('max.language_id', '=', 1);
@@ -386,7 +404,15 @@ class DAL {
 			
 			else
 			{
-				$this->model->includes[] = 'lang';
+				$this->model->includes[] = array('lang' => function($query) use ($filters)
+				{
+					foreach($filters as $filter)
+					{
+						list($table, $column, $value) = $filter;
+
+						$query = $query->where($table.'.'.$column, '=', $value);
+					}
+				});
 			}
 		}
 
@@ -404,6 +430,13 @@ class DAL {
 
 		$this->apply_joins();
 
+		foreach($this->get_filters($this->table) as $filter)
+		{
+			list($table, $column, $value) = $filter;
+
+			$this->model = $this->model->where($table.'.'.$column, '=', $value);
+		}
+
 		// Add where's to our query
 		if ($this->options['search']['string'] !== '')
 		{
@@ -412,7 +445,7 @@ class DAL {
 			
 			$this->model = $this->model->where(function($query) use ($columns, $string)
 			{
-				foreach ($columns as $column)
+				foreach($columns as $column)
 				{
 					$query->or_where($column, ' LIKE ', '%'.$string.'%');
 				}
@@ -444,38 +477,66 @@ class DAL {
 	 */
 	public function read($id)
 	{
+		if( ! $this->valid_options())
+		{
+			return $this;
+		}
+
 		if( ! $this->find($id))
 		{
 			return $this;
 		}
 
-		$version = isset($this->options['version']) ? $this->options['version'] : null;
+		$version = isset($this->options['filter']['version']) ? $this->options['filter']['version'] : null;
 
 		if(is_null($version) && $this->versioned)
 		{
 			if($this->multilanguage)
 			{
-				$version = DB::table($this->language_table)
-					->where($this->language_table_foreign_key, '=', $this->id)
-					->max('version');
+				$query = DB::table($this->language_table)
+					->where($this->language_table_foreign_key, '=', $this->id);
+
+				foreach($this->get_filters($this->language_table) as $filter)
+				{
+					list($table, $column, $value) = $filter;
+
+					$query = $query->where($table.'.'.$column, '=', $value);
+				}
+
+				$version = $query->max('version');
 			}
 			else
 			{
-				$version = DB::table($this->table)
-					->where_id($this->id)
-					->max('version');
+				$query = DB::table($this->table)
+					->where_id($this->id);
 
-				$this->model = $this->model->where($this->table.'.version', '=', $version);
+				foreach($this->get_filters($this->table) as $filter)
+				{
+					list($table, $column, $value) = $filter;
+
+					$query = $query->where($table.'.'.$column, '=', $value);
+				}
+
+				$version = $query->max('version');
 			}
 		}
 
 		if($this->multilanguage)
 		{
-			if( ! isset($this->options['language_id']))
+			if( ! isset($this->options['filter']['language_id']))
 			{
+				$filters = $this->get_filters($this->language_table);
+
 				$this->model->model->with(array(
-					'languages' => function($query) use ($version)
+					'languages' => function($query) use ($version, $filters)
 					{
+						foreach($filters as $filter)
+						{
+							list($table, $column, $value) = $filter;
+
+							$query->where($table.'.'.$column, '=', $value);
+						}
+
 						if( ! is_null($version))
 						{
 							$query->where_version($version);
@@ -485,11 +546,20 @@ class DAL {
 			}
 			else
 			{
-				$language_id = $this->options['language_id'];
+				$language_id = $this->options['filter']['language_id'];
+
+				$filters = $this->get_filters($this->language_table);
 
 				$this->model->model->with(array(
-					'lang' => function($query) use ($version, $language_id)
+					'lang' => function($query) use ($version, $language_id, $filters)
 					{
+						foreach($filters as $filter)
+						{
+							list($table, $column, $value) = $filter;
+
+							$query->where($table.'.'.$column, '=', $value);
+						}
+
 						$query->where_language_id($language_id);
 
 						if( ! is_null($version))
@@ -500,8 +570,18 @@ class DAL {
 				));
 			}
 		}
-		
-		$this->apply_joins();
+
+		if( ! is_null($version))
+		{
+			$this->model = $this->model->where($this->table.'.version', '=', $version);
+		}
+
+		foreach($this->get_filters($this->table) as $filter)
+		{
+			list($table, $column, $value) = $filter;
+
+			$this->model = $this->model->where($table.'.'.$column, '=', $value);
+		}
 
 		$this->data = $this->model->first($this->get_columns)->to_array();
 
@@ -512,7 +592,7 @@ class DAL {
 
 	public function create_multiple()
 	{
-		foreach ($this->input as $input)
+		foreach($this->input as $input)
 		{
 			$dal = clone $this;
 
@@ -559,7 +639,7 @@ class DAL {
 		if($this->multilanguage)
 		{
 			$lang_input = array();
-			foreach ($this->input['lang'] as $id => $input)
+			foreach($this->input['lang'] as $id => $input)
 			{
 				$input['language_id'] = $id;
 				$input[$this->language_table_foreign_key] = $this->id;
@@ -591,7 +671,7 @@ class DAL {
 
 	public function update_multiple()
 	{
-		foreach ($this->input as $input)
+		foreach($this->input as $input)
 		{
 			$dal = clone $this;
 
@@ -640,7 +720,7 @@ class DAL {
 			}
 
 			$lang_input = array();
-			foreach ($this->input['lang'] as $id => $input)
+			foreach($this->input['lang'] as $id => $input)
 			{
 				$input['language_id'] = $id;
 				$input[$this->language_table_foreign_key] = $this->id;
@@ -691,7 +771,7 @@ class DAL {
 
 	public function delete_multiple($ids)
 	{
-		foreach ($ids as $id)
+		foreach($ids as $id)
 		{
 			$dal = clone $this;
 
@@ -750,7 +830,7 @@ class DAL {
 		return $this->data[$key];
 	}
 
-	protected function find($id)
+	public function find($id)
 	{
 		$column = 'id';
 
@@ -779,7 +859,9 @@ class DAL {
 					$id = $language_row->{$this->language_table_foreign_key};
 
 					$this->options(array(
-						'language_id' => $language_row->language_id
+						'filter' => array(
+							'language_id' => $language_row->language_id
+						)
 					));
 				}
 			}
@@ -824,7 +906,7 @@ class DAL {
 	{
 		if(count($this->joins) > 0)
 		{
-			foreach ($this->joins as $table => $join)
+			foreach($this->joins as $table => $join)
 			{
 				extract($join);
 
@@ -846,7 +928,7 @@ class DAL {
 						$this->settings['relating'][$table_name] = $this->get_columns($table_name);
 					}
 
-					foreach ($this->settings['relating'][$table_name] as $column)
+					foreach($this->settings['relating'][$table_name] as $column)
 					{
 						$this->mapped_columns[$alias_name][$column] = 'temp_'.$alias_name.'_'.$column;
 
@@ -869,9 +951,9 @@ class DAL {
 
 	protected function apply_mapping($result)
 	{
-		foreach ($this->mapped_columns as $table => $columns)
+		foreach($this->mapped_columns as $table => $columns)
 		{
-			foreach ($columns as $column => $temp_name)
+			foreach($columns as $column => $temp_name)
 			{
 				$result[ends_with($table, '_lang') ? 'lang' : $table][$column] = $result[$temp_name];
 				unset($result[$temp_name]);
@@ -887,7 +969,7 @@ class DAL {
 		{
 			if(array_key_exists('results', $this->data) && array_key_exists('total', $this->data) && array_key_exists('pages', $this->data))
 			{
-				foreach ($this->data['results'] as &$row)
+				foreach($this->data['results'] as &$row)
 				{
 					$row = $this->apply_mapping($row);
 				}
@@ -897,6 +979,26 @@ class DAL {
 				$this->data = $this->apply_mapping($this->data);
 			}
 		}
+	}
+
+	protected function get_filters($table)
+	{
+		$filters = array();
+
+		if(empty($this->settings['filterable'][$table]))
+		{
+			return $filters;
+		}
+
+		foreach($this->options['filter'] as $column => $value)
+		{
+			if(in_array($column, $this->settings['filterable'][$table]))
+			{
+				$filters[] = array($table, $column, $value);
+			}
+		}
+
+		return $filters;
 	}
 
 	protected function get_columns($table)
@@ -933,7 +1035,7 @@ class DAL {
 			$join = true;
 		}
 
-		foreach ($this->options['search']['columns'] as $column)
+		foreach($this->options['search']['columns'] as $column)
 		{
 			if(in_array($column, $this->settings['searchable'][$table]))
 			{
@@ -947,7 +1049,7 @@ class DAL {
 	protected function valid_options()
 	{
 		$found = false;
-		foreach ($this->settings['sortable'] as $table => $columns)
+		foreach($this->settings['sortable'] as $table => $columns)
 		{
 			if(in_array($this->options['sort_by'], $columns))
 			{
@@ -976,10 +1078,10 @@ class DAL {
 			}
 
 			$unfound_columns = array();		
-			foreach ($this->options['search']['columns'] as $i => $column)
+			foreach($this->options['search']['columns'] as $i => $column)
 			{
 				$found = false;
-				foreach ($this->settings['searchable'] as $table => $columns)
+				foreach($this->settings['searchable'] as $table => $columns)
 				{
 					if (in_array($column, $columns))
 					{
@@ -1013,6 +1115,26 @@ class DAL {
 
 					return false;
 				}
+			}
+		}
+
+		foreach($this->options['filter'] as $column => $value)
+		{
+			$found = false;
+			foreach($this->settings['filterable'] as $table => $columns)
+			{
+				if(in_array($column, $this->settings['filterable'][$table]))
+				{
+					$found = true;
+				}
+			}
+
+			if( ! $found)
+			{
+				$this->data = "The specified filter option \"".$column."\" is not supported";
+				$this->code = 400;
+
+				return false;
 			}
 		}
 		

@@ -46,6 +46,14 @@ class Domain_Page_Controller extends Domain_Base_Controller {
 						'menu',
 						'content'
 					)
+				),
+				'filterable' => array(
+					'pages' => array(
+						'order'
+					),
+					'page_lang' => array(
+						'slug'
+					)
 				)
 			))
 			->multilanguage()
