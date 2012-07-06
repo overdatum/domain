@@ -91,15 +91,6 @@ class Domain_Add_Tables {
 			'updated_at' => new \DateTime
 		));
 
-		DB::table('pages')->insert(array(
-			'template_id' => 1,
-			'account_id' => 1,
-			'type' => 'published',
-			'order' => 2,
-			'created_at' => new \DateTime,
-			'updated_at' => new \DateTime
-		));
-
 		Schema::create('page_lang', function($table)
 		{
 			$table->increments('id');
@@ -113,6 +104,7 @@ class Domain_Add_Tables {
 			$table->text('meta_description');
 			$table->string('menu');
 			$table->text('content');
+			$table->integer('version');
 			$table->timestamps();
 		});
 
@@ -120,6 +112,7 @@ class Domain_Add_Tables {
 		DB::table('page_lang')->insert(array(
 			'page_id' => 1,
 			'language_id' => 2,
+			'version' => 1,
 			'active' => 0,
 			'url' => 'welkom',
 			'slug' => 'welkom',
@@ -135,6 +128,7 @@ class Domain_Add_Tables {
 		DB::table('page_lang')->insert(array(
 			'page_id' => 1,
 			'language_id' => 1,
+			'version' => 1,
 			'active' => 0,
 			'url' => 'home',
 			'slug' => 'home',
@@ -150,6 +144,7 @@ class Domain_Add_Tables {
 		DB::table('page_lang')->insert(array(
 			'page_id' => 2,
 			'language_id' => 1,
+			'version' => 1,
 			'active' => 1,
 			'url' => 'about-us',
 			'slug' => 'about-us',
@@ -165,6 +160,7 @@ class Domain_Add_Tables {
 		DB::table('page_lang')->insert(array(
 			'page_id' => 2,
 			'language_id' => 2,
+			'version' => 1,
 			'active' => 0,
 			'url' => 'over-ons',
 			'slug' => 'over-ons',
@@ -306,11 +302,27 @@ class Domain_Add_Tables {
 		Schema::create('languages', function($table)
 		{
 			$table->increments('id');
+			$table->string('slug');
 			$table->string('name');
 		});
 
 		DB::table('languages')->insert(array(
-			'name' => 'English'
+			array(
+				'slug' => 'english',
+				'name' => 'English'
+			),
+			array(
+				'slug' => 'dutch',
+				'name' => 'Dutch'
+			),
+			array(
+				'slug' => 'italian',
+				'name' => 'Italian'
+			),
+			array(
+				'slug' => 'german',
+				'name' => 'German'
+			)
 		));
 
 		Schema::create('layouts', function($table)
