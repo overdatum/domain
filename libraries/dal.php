@@ -19,8 +19,6 @@
 
 namespace Domain\Libraries;
 
-use StdClass;
-
 use Laravel\Str;
 use Laravel\Database as DB;
 
@@ -258,6 +256,18 @@ class DAL {
 		return $this;
 	}
 
+	/**
+	 * Method for merging options
+	 * 
+	 * @var array the options
+	 */
+	public function join($join)
+	{
+		$this->joins[] = $join;
+
+		return $this;
+	}
+
 	public function filter($filter)
 	{
 		$this->options['filter'] = array_replace_recursive($this->options['filter'], $filter);
@@ -487,7 +497,11 @@ class DAL {
 			return $this;
 		}
 
-		$version = isset($this->options['filter']['version']) ? $this->options['filter']['version'] : null;
+		$version = isset($this->options['filter']['version'])
+			?
+				$this->options['filter']['version']
+			:
+				null;
 
 		if(is_null($version) && $this->versioned)
 		{
@@ -527,22 +541,20 @@ class DAL {
 			{
 				$filters = $this->get_filters($this->language_table);
 
-				$this->model->model->with(array(
-					'languages' => function($query) use ($version, $filters)
+				$this->model->model->includes['languages'] = function($query) use ($version, $filters)
+				{
+					foreach($filters as $filter)
 					{
-						foreach($filters as $filter)
-						{
-							list($table, $column, $value) = $filter;
+						list($table, $column, $value) = $filter;
 
-							$query->where($table.'.'.$column, '=', $value);
-						}
-
-						if( ! is_null($version))
-						{
-							$query->where_version($version);
-						}
+						$query->where($table.'.'.$column, '=', $value);
 					}
-				));
+
+					if( ! is_null($version))
+					{
+						$query->where_version($version);
+					}
+				};
 			}
 			else
 			{
@@ -550,24 +562,22 @@ class DAL {
 
 				$filters = $this->get_filters($this->language_table);
 
-				$this->model->model->with(array(
-					'lang' => function($query) use ($version, $language_id, $filters)
+				$this->model->model->includes['lang'] = function($query) use ($version, $language_id, $filters)
+				{
+					foreach($filters as $filter)
 					{
-						foreach($filters as $filter)
-						{
-							list($table, $column, $value) = $filter;
+						list($table, $column, $value) = $filter;
 
-							$query->where($table.'.'.$column, '=', $value);
-						}
-
-						$query->where_language_id($language_id);
-
-						if( ! is_null($version))
-						{
-							$query->where_version($version);
-						}
+						$query->where($table.'.'.$column, '=', $value);
 					}
-				));
+
+					$query->where_language_id($language_id);
+
+					if( ! is_null($version))
+					{
+						$query->where_version($version);
+					}
+				};
 			}
 		}
 
@@ -695,6 +705,17 @@ class DAL {
 	{
 		if( ! $this->find($id))
 		{
+			if($this->parent)
+			{
+				$this->input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
+
+				return DAL::model($this->model->model)
+					->parent($this->parent)
+					->versioned($this->versioned)
+					->input($this->input)
+					->create();
+			}
+
 			return $this;
 		}
 
@@ -712,13 +733,6 @@ class DAL {
 
 		if($this->multilanguage)
 		{
-			if($this->parent)
-			{
-				$this->input[$this->parent->language_table_foreign_key] = $this->parent->model->id;
-
-				return $this->create();
-			}
-
 			$lang_input = array();
 			foreach($this->input['lang'] as $id => $input)
 			{
@@ -729,7 +743,7 @@ class DAL {
 			}
 
 			unset($this->input['lang']);
-			
+
 			$dal = DAL::model($this->language_model)
 				->parent($this)
 				->versioned($this->versioned)
